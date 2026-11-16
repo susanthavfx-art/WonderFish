@@ -1,0 +1,848 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-deep: #031528;
+  --glass-bg: rgba(6, 28, 52, 0.76);
+  --glass-border: rgba(56, 189, 248, 0.28);
+  --accent-cyan: #22d3ee;
+  --accent-teal: #14b8a6;
+  --accent-coral: #ff6b35;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+}
+
+html, body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   1. 3D AQUARIUM FULLSCREEN VIEWPORT & GLASSMORPHIC HUD (index.html)
+   ========================================================================== */
+
+body.aquarium-body {
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+#aquarium-canvas-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  /* Instant paint + graceful fallback if WebGL is unavailable.
+     The opaque WebGL canvas covers this the moment the tank starts. */
+  background: #031528 url('../assets/underwater-bg.jpg') center center / cover no-repeat;
+}
+
+.top-hud {
+  position: fixed;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+
+.brand-pill, .hud-actions {
+  pointer-events: auto;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.hud-actions {
+  padding: 6px 10px;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+}
+
+.live-dot.online {
+  background: #10b981;
+  box-shadow: 0 0 12px #10b981;
+}
+
+.brand-title {
+  font-weight: 700;
+  font-size: 0.98rem;
+  letter-spacing: -0.01em;
+}
+
+.count-badge {
+  background: rgba(34, 211, 238, 0.16);
+  color: #67e8f9;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* WonderLab AR Brand Logo */
+.brand-logo {
+  height: 26px;
+  width: auto;
+  max-width: 150px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+}
+
+.sub-logo {
+  height: 20px;
+  max-width: 120px;
+}
+
+.sub-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   TOP BAR COMPACT STYLING & MINIMIZE STATE
+   ========================================================================== */
+
+.top-hud {
+  transition: top 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+}
+
+.top-hud.collapsed {
+  top: 10px;
+  left: 10px;
+  right: auto;
+  pointer-events: auto;
+}
+
+.top-hud.collapsed .brand-pill,
+.top-hud.collapsed .hud-actions .hud-btn {
+  display: none !important;
+}
+
+.top-hud.collapsed .hud-actions {
+  background: var(--glass-bg);
+  border-radius: 999px;
+  padding: 4px 10px;
+  gap: 0;
+}
+
+.top-hud.collapsed .hud-actions .hud-collapse-btn {
+  display: inline-flex !important;
+  font-size: 1rem;
+  padding: 4px 11px;
+}
+
+/* Compact glass buttons */
+.top-hud .hud-btn {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  gap: 4px;
+}
+
+.top-hud .brand-pill {
+  padding: 6px 14px 6px 10px;
+  gap: 8px;
+}
+
+.top-hud .brand-title {
+  font-size: 0.92rem;
+}
+
+.hud-collapse-btn {
+  font-size: 0.82rem;
+  padding: 5px 9px;
+}
+
+.hud-btn {
+  appearance: none;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 42, 74, 0.75);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hud-btn:hover {
+  background: rgba(34, 211, 238, 0.22);
+  border-color: rgba(34, 211, 238, 0.6);
+  transform: translateY(-1px);
+}
+
+.hud-btn.primary-cta {
+  background: linear-gradient(135deg, #06b6d4, #2563eb);
+  border-color: rgba(125, 211, 252, 0.6);
+  color: #ffffff;
+}
+
+.hud-btn.secondary-cta {
+  background: linear-gradient(135deg, #f97316, #ec4899);
+  border-color: rgba(253, 186, 116, 0.55);
+  color: #ffffff;
+}
+
+.hud-btn.active-pill {
+  border-color: #2dd4bf;
+  background: rgba(20, 184, 166, 0.24);
+  color: #99f6e4;
+}
+
+/* Celebratory New Fish Arrival Toast */
+.arrival-toast {
+  position: fixed;
+  top: 78px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-28px) scale(0.94);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 35;
+  background: linear-gradient(135deg, rgba(6, 78, 99, 0.94), rgba(15, 23, 42, 0.94));
+  border: 1.5px solid rgba(45, 212, 191, 0.75);
+  border-radius: 20px;
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5), 0 0 28px rgba(45, 212, 191, 0.35);
+  transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.arrival-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.toast-emoji {
+  font-size: 2.2rem;
+}
+
+.toast-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #5eead4;
+}
+
+.toast-sub {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  margin-top: 2px;
+}
+
+/* Bottom-Right Exhibition QR Card */
+.qr-card {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 20;
+  width: 224px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  transition: transform 0.25s ease;
+}
+
+.qr-card.minimized .qr-body {
+  display: none;
+}
+
+.qr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #67e8f9;
+  margin-bottom: 8px;
+}
+
+.qr-card.minimized .qr-header {
+  margin-bottom: 0;
+}
+
+.qr-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.qr-img-box {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 8px;
+  width: 148px;
+  height: 148px;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-img-box img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.qr-caption {
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.qr-url {
+  margin-top: 5px;
+  font-size: 0.68rem;
+  color: #38bdf8;
+  word-break: break-all;
+}
+
+/* Hint pill bottom-left */
+.tank-hint-pill {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 18;
+  background: rgba(6, 28, 52, 0.68);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  pointer-events: none;
+}
+
+/* Creature Inspect Spotlight Card */
+.inspect-card {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 30;
+  background: rgba(7, 30, 56, 0.92);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(45, 212, 191, 0.55);
+  border-radius: 20px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  max-width: 420px;
+}
+
+.inspect-card img {
+  width: 74px;
+  height: 74px;
+  border-radius: 12px;
+  background: #ffffff;
+  object-fit: cover;
+  border: 2px solid #2dd4bf;
+}
+
+.inspect-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* Split-Screen Studio Drawer for Single-Screen Testing */
+.studio-drawer {
+  position: fixed;
+  top: 68px;
+  right: 16px;
+  bottom: 16px;
+  width: min(440px, calc(100vw - 32px));
+  z-index: 40;
+  background: rgba(6, 22, 42, 0.96);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -12px 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.drawer-header {
+  padding: 10px 14px;
+  background: rgba(12, 38, 68, 0.95);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.studio-drawer iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #04182e;
+}
+
+/* ==========================================================================
+   2. MOBILE PAPER SCANNER & 3D/AR PREVIEW (scan.html)
+   ========================================================================== */
+
+body.scanner-body {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0a365c 0%, #031528 70%);
+  padding-bottom: 40px;
+}
+
+.mobile-shell {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+.sub-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.panel-card {
+  background: rgba(8, 31, 58, 0.84);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+}
+
+.step-badge {
+  display: inline-block;
+  background: rgba(34, 211, 238, 0.16);
+  color: #67e8f9;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.panel-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.panel-desc {
+  font-size: 0.86rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.camera-stage {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #020d1a;
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
+  margin-bottom: 14px;
+}
+
+.camera-stage video {
+  width: 100%;
+  display: block;
+  max-height: 380px;
+  object-fit: cover;
+}
+
+.camera-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.detect-banner {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #e2e8f0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 999px;
+  text-align: center;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.detect-banner.locked {
+  background: rgba(6, 78, 59, 0.92);
+  border-color: #34d399;
+  color: #a7f3d0;
+}
+
+.btn-block {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-block:active {
+  transform: scale(0.98);
+}
+
+.btn-gradient-teal {
+  background: linear-gradient(135deg, #06b6d4, #10b981);
+  color: #ffffff;
+  box-shadow: 0 8px 22px rgba(6, 182, 212, 0.35);
+}
+
+.btn-gradient-coral {
+  background: linear-gradient(135deg, #f97316, #ec4899);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.38);
+}
+
+.btn-outline {
+  background: rgba(15, 42, 74, 0.65);
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  color: #e2e8f0;
+}
+
+.divider-label {
+  text-align: center;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  margin: 14px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sample-box {
+  background: rgba(12, 42, 74, 0.6);
+  border: 1px dashed rgba(56, 189, 248, 0.4);
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.select-input, .text-input {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  background: rgba(4, 20, 38, 0.85);
+  color: #f8fafc;
+  font-size: 0.92rem;
+}
+
+/* 3D / Live Camera WebAR Stage */
+.preview-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mode-tab {
+  padding: 9px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(125, 211, 252, 0.25);
+  background: rgba(4, 20, 38, 0.7);
+  color: #cbd5e1;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.mode-tab.active-tab {
+  background: linear-gradient(135deg, #0284c7, #0d9488);
+  border-color: #5eead4;
+  color: #ffffff;
+}
+
+.ar-stage-wrap {
+  position: relative;
+  width: 100%;
+  height: 290px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1.5px solid rgba(45, 212, 191, 0.45);
+  background: radial-gradient(circle at center, #0c4a6e, #04182e);
+  margin-bottom: 12px;
+}
+
+#ar-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+#preview-3d-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.thumbs-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(4, 20, 38, 0.65);
+  padding: 8px 10px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.thumbs-row img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #fff;
+  border: 1px solid rgba(125, 211, 252, 0.4);
+}
+
+#crop-editor-canvas {
+  width: 100%;
+  border-radius: 14px;
+  border: 1.5px solid #2dd4bf;
+  touch-action: none;
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   3. PRINTABLE A4 COLORING SHEETS & VIRTUAL CRAYON TESTER (sheets.html)
+   ========================================================================== */
+
+body.sheets-body {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0a365c 0%, #031528 75%);
+  padding: 18px 14px 50px;
+}
+
+.sheets-container {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.species-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+
+.species-tab {
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  background: rgba(8, 31, 58, 0.8);
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.species-tab.active {
+  background: linear-gradient(135deg, #06b6d4, #2563eb);
+  border-color: #7dd3fc;
+  color: #ffffff;
+}
+
+.crayon-toolbar {
+  background: rgba(8, 31, 58, 0.9);
+  border: 1px solid rgba(45, 212, 191, 0.45);
+  border-radius: 18px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.swatches-wrap {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.swatch-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.swatch-btn.selected {
+  transform: scale(1.22);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px #22d3ee;
+}
+
+/* Printable White A4 Paper Card */
+.a4-paper-sheet {
+  background: #ffffff;
+  color: #0f172a;
+  max-width: 680px;
+  margin: 0 auto;
+  border-radius: 16px;
+  padding: 26px 28px;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.55);
+}
+
+.sheet-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.sheet-brand {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sheet-steps {
+  font-size: 0.8rem;
+  color: #475569;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.sheet-qr-box {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sheet-qr-box img {
+  width: 74px;
+  height: 74px;
+  display: block;
+  margin: 0 auto;
+}
+
+.sheet-qr-box span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+#sheet-frame-canvas {
+  width: 100%;
+  max-width: 580px;
+  aspect-ratio: 1 / 1;
+  display: block;
+  margin: 0 auto;
+  touch-action: none;
+}
+
+.sheet-footer-row {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+/* Clean A4 Print Media Query! */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  body.sheets-body {
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .a4-paper-sheet {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 6mm !important;
+    max-width: 100% !important;
+  }
+}

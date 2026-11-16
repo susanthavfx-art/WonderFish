@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Printable Coloring Sheets • 3D Digital Aquarium</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body class="sheets-body">
+  <div class="sheets-container">
+    <div class="no-print">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="./index.html" class="hud-btn" style="text-decoration: none;">🏠 Home</a>
+          <a href="./aquarium.html" class="hud-btn" style="text-decoration: none;">🌊 3D Aquarium</a>
+          <img src="./assets/wonderlab-ar-logo.png" alt="WonderLab AR" class="brand-logo sub-logo" />
+          <h1 style="font-size: 1.1rem; font-weight: 800;">🖨️ Coloring Sheets</h1>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="btn-toggle-crayon" class="hud-btn secondary-cta">
+            🖍️ Test Color Here (No Printer)
+          </button>
+          <button id="btn-download-png" class="hud-btn primary-cta">
+            ⬇️ Download A4 PNG
+          </button>
+          <a
+            href="./coloring-sheets/All-5-Digital-Aquarium-Coloring-Sheets-A4.pdf"
+            target="_blank"
+            rel="noopener"
+            download="All-5-Digital-Aquarium-Coloring-Sheets-A4.pdf"
+            class="hud-btn"
+          >
+            📄 All 5 Sheets (PDF)
+          </a>
+          <button id="btn-print-sheet" class="hud-btn">
+            🖨️ Print A4 Sheet
+          </button>
+        </div>
+      </div>
+
+      <p style="font-size: 0.86rem; color: #cbd5e1; margin-top: 8px;">
+        Print any of these 5 sheets on standard A4 paper, color with crayons/pencils, and scan with your phone camera! Or click <strong>"🖍️ Test Color Here"</strong> to color on-screen and simulate a real camera scan right now.
+      </p>
+
+      <div id="species-tabs" class="species-tabs"></div>
+
+      <div id="crayon-toolbar" class="crayon-toolbar hidden">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #5eead4;">🖍️ Crayons:</span>
+        <div id="crayon-swatches" class="swatches-wrap"></div>
+
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #cbd5e1;">
+          Size
+          <input id="brush-size-range" type="range" min="8" max="44" value="22" style="width: 80px;" />
+        </label>
+
+        <button id="btn-clear-crayon" class="hud-btn" style="font-size: 0.78rem;">↺ Clear</button>
+        <button id="btn-send-to-scanner" class="hud-btn primary-cta" style="margin-left: auto;">
+          📷 Simulate Camera Scan →
+        </button>
+      </div>
+    </div>
+
+    <article class="a4-paper-sheet">
+      <div class="sheet-top-row">
+        <div>
+          <div class="sheet-brand">🐠 DIGITAL AQUARIUM • COLOR &amp; SCAN</div>
+          <div id="sheet-species-title" style="font-size: 1rem; font-weight: 700; color: #0284c7; margin-top: 2px;"></div>
+          <div class="sheet-steps">
+            1. Color inside the sea creature with crayons or color pencils.<br />
+            2. Do not cover the <strong>4 black corner squares</strong> or top code dots.<br />
+            3. Scan the QR code with your phone camera to bring it to life in 3D!
+          </div>
+        </div>
+        <div class="sheet-qr-box">
+          <img id="sheet-qr-img" alt="Scanner QR Code" />
+          <span>SCAN ME</span>
+        </div>
+      </div>
+
+      <canvas id="sheet-frame-canvas" width="640" height="640"></canvas>
+
+      <div class="sheet-footer-row">
+        <span>Artist Name / ඔයාගේ නම: ___________________________________</span>
+        <span>3D AR + Live Tank</span>
+      </div>
+    </article>
+  </div>
+
+  <!-- Iframe-Safe Fallback Preview Modal -->
+  <div
+    id="download-ready-modal"
+    class="no-print hidden"
+    style="position: fixed; inset: 0; z-index: 100; background: rgba(2, 12, 27, 0.82); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px;"
+  >
+    <div class="panel-card" style="max-width: 460px; width: 100%; text-align: center;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span class="step-badge" style="margin-bottom: 0;">✅ A4 PNG SHEET READY</span>
+        <button id="btn-close-dl-modal" class="hud-btn" style="padding: 4px 10px;">✕</button>
+      </div>
+      <p style="font-size: 0.83rem; color: #cbd5e1; margin-bottom: 12px;">
+        Click below to open in a new tab or right-click the image to save:
+      </p>
+      <div style="background: #fff; padding: 8px; border-radius: 12px; max-height: 280px; overflow: auto; margin-bottom: 12px;">
+        <img id="dl-modal-img" src="" alt="A4 Printable Sheet" style="width: 100%; height: auto; display: block;" />
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a
+          id="dl-open-newtab"
+          href="#"
+          target="_blank"
+          rel="noopener"
+          class="btn-block btn-gradient-teal"
+          style="flex: 1; text-decoration: none; font-size: 0.88rem;"
+        >
+          ↗ Open in New Tab &amp; Save
+        </a>
+        <a
+          id="dl-direct-link"
+          href="#"
+          download
+          class="btn-block btn-outline"
+          style="width: auto; text-decoration: none; font-size: 0.88rem; padding: 12px 16px;"
+        >
+          ⬇️ Download
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/sheets.js"></script>
+</body>
+</html>

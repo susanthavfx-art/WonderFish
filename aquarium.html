@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Digital Aquarium • Live Interactive Display</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <!-- Underwater photo backdrop: start downloading immediately so the tank never flashes empty -->
+  <link rel="preload" as="image" href="./assets/underwater-bg.jpg" />
+  <script src="./vendor/supabase.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js"
+      }
+    }
+  </script>
+  <style>
+    body.embedded-preview #top-hud,
+    body.embedded-preview #qr-card,
+    body.embedded-preview .tank-hint-pill {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="aquarium-body">
+  <!-- Fullscreen 3D Underwater WebGL Viewport -->
+  <div id="aquarium-canvas-wrap"></div>
+
+  <!-- Top Glassmorphic Exhibition HUD -->
+  <header class="top-hud" id="top-hud">
+    <div class="brand-pill">
+      <img src="./assets/wonderlab-ar-logo.png" alt="WonderLab AR" class="brand-logo" />
+      <span id="live-status-dot" class="live-dot" title="Supabase Realtime Status"></span>
+      <span id="tank-title-label" class="brand-title">🐠 3D Digital Aquarium</span>
+      <button
+        id="btn-room-pill"
+        type="button"
+        class="count-badge"
+        style="cursor: pointer; border: 1px solid rgba(94, 234, 212, 0.55); background: rgba(13, 148, 136, 0.28); color: #99f6e4; font-family: inherit;"
+        title="Click to switch Tank Code or create a new Client / Party Tank"
+      >
+        🔑 Tank: WONDER-REEF
+      </button>
+      <span id="fish-count-badge" class="count-badge">6 Sea Creatures</span>
+    </div>
+
+    <div class="hud-actions">
+      <a href="./index.html" class="hud-btn" style="text-decoration: none;" title="Back to Client Showcase Website">
+        🏠 Website
+      </a>
+      <button id="btn-open-scanner-drawer" class="hud-btn primary-cta" title="Test Paper Camera Scanner side-by-side">
+        📷 Scan Sheet
+      </button>
+      <button id="btn-open-sheets-drawer" class="hud-btn secondary-cta" title="Print or test-color A4 coloring sheets">
+        🖨️ Sheets
+      </button>
+      <button id="btn-feed" class="hud-btn" title="Drop fish food">🍤</button>
+      <button id="btn-shark" class="hud-btn" title="Summon visiting shark">🦈</button>
+      <button id="btn-labels" class="hud-btn active-pill" title="Toggle creature name badges">🏷️</button>
+      <button id="btn-demo-toggle" class="hud-btn active-pill" title="Toggle starter demo fish">🎨</button>
+      <label class="hud-btn" style="cursor: pointer;" title="Preview your own Blender .glb tank model instantly!">
+        🧱
+        <input id="glb-test-input" type="file" accept=".glb,.gltf" class="hidden" />
+      </label>
+      <button id="btn-reset-tank" class="hud-btn" title="Clear all fish &amp; start fresh">🧹</button>
+      <button id="btn-sound" class="hud-btn" title="Toggle sound">🔊</button>
+      <button id="btn-fullscreen" class="hud-btn" title="Toggle fullscreen">⛶</button>
+      <button id="btn-collapse-hud" class="hud-btn hud-collapse-btn" title="Minimize / Expand menu bar">▾</button>
+    </div>
+  </header>
+
+  <!-- Celebratory New Fish Arrival Banner -->
+  <div id="arrival-toast" class="arrival-toast"></div>
+
+  <!-- Interactive Hint Pill -->
+  <div class="tank-hint-pill">
+    💡 Click water to drop fish food • Click any fish to see its scanned sheet • Drag to look around
+  </div>
+
+  <!-- Creature Click Spotlight Card -->
+  <div id="fish-inspect-card" class="inspect-card hidden">
+    <img id="inspect-img" src="" alt="Scanned texture" />
+    <div style="flex: 1; min-width: 0;">
+      <div id="inspect-title" style="font-weight: 700; font-size: 0.96rem; color: #5eead4;"></div>
+      <div id="inspect-sub" style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;"></div>
+      <button
+        id="btn-delete-single-fish"
+        class="hud-btn hidden"
+        style="margin-top: 7px; padding: 4px 10px; font-size: 0.74rem; border-color: rgba(248, 113, 113, 0.5); color: #fca5a5;"
+      >
+        🗑️ මේ මාළුවා අයින් කරන්න
+      </button>
+    </div>
+    <button id="close-inspect" class="inspect-close" aria-label="Close">✕</button>
+  </div>
+
+  <!-- PIN-Protected Reset Aquarium Modal -->
+  <div
+    id="reset-tank-modal"
+    class="hidden"
+    style="position: fixed; inset: 0; z-index: 60; background: rgba(2, 12, 27, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px;"
+  >
+    <div class="panel-card" style="max-width: 420px; width: 100%;">
+      <span class="step-badge">ADMIN RESET • CLEAR TANK</span>
+      <h2 class="panel-title">🧹 මුල ඉඳලා අලුතින් පටන් ගමුද?</h2>
+      <p class="panel-desc">
+        මේකෙන් දැනට විවෘත කර ඇති <strong id="reset-room-label" style="color: #5eead4;">WONDER-REEF</strong> ටැංකියේ පමණක් scan කරපු මාළු ඉවත් කරනවා (වෙනත් Client/Party ටැංකිවල මාළුන්ට කිසිම බලපෑමක් නැත!).
+      </p>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #bae6fd; margin-bottom: 5px;">
+          🔐 Admin PIN අංකය (Default: <code>1234</code>):
+        </label>
+        <input
+          id="reset-pin-input"
+          type="password"
+          inputmode="numeric"
+          placeholder="1234"
+          class="text-input"
+        />
+      </div>
+
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 16px; cursor: pointer;">
+        <input id="chk-reset-hide-demo" type="checkbox" checked />
+        Starter Demo මාළු 5 දෙනාත් hide කරන්න (100% හිස් ටැංකියක්)
+      </label>
+
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-cancel-reset" class="btn-block btn-outline" style="width: auto;">Cancel</button>
+        <button id="btn-confirm-reset" class="btn-block btn-gradient-coral" style="flex: 1;">
+          🧹 ඔක්කොම මාළු ඉවත් කරන්න
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tank Code / Party & Client Room Switcher Modal -->
+  <div
+    id="room-switch-modal"
+    class="hidden"
+    style="position: fixed; inset: 0; z-index: 65; background: rgba(2, 12, 27, 0.82); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px;"
+  >
+    <div class="panel-card" style="max-width: 450px; width: 100%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="step-badge" style="margin-bottom: 0;">🔑 TANK CODE • ROOM MANAGER</span>
+        <button id="btn-close-room-modal" type="button" class="hud-btn" style="padding: 4px 10px;">✕</button>
+      </div>
+      <h2 class="panel-title">Client / Party Tank Code 🐠</h2>
+      <p class="panel-desc">
+        එක එක Party එකට, School එකට හෝ Client Event එකට වෙනම <strong>Tank Code</strong> එකක් භාවිතා කරන්න — එවිට මාළු එකට කලවම් වෙන්නේ නැහැ!
+      </p>
+
+      <div style="margin-bottom: 10px;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #bae6fd; margin-bottom: 5px;">
+          🔑 Tank Code (e.g. <code>LEO-PARTY</code>, <code>EXPO-2026</code>):
+        </label>
+        <div style="display: flex; gap: 8px;">
+          <input
+            id="room-code-modal-input"
+            type="text"
+            maxlength="28"
+            placeholder="REEF-4829"
+            class="text-input"
+            style="text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;"
+          />
+          <button id="btn-random-room" type="button" class="hud-btn" style="white-space: nowrap; padding: 0 12px;" title="Generate New Random Code">
+            🎲 New Code
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #bae6fd; margin-bottom: 5px;">
+          🏷️ Event / Tank Name (Optional):
+        </label>
+        <input
+          id="room-title-modal-input"
+          type="text"
+          maxlength="60"
+          placeholder="e.g. Leo's 6th Birthday Reef 🎂"
+          class="text-input"
+        />
+      </div>
+
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button id="btn-copy-room-scanner" type="button" class="btn-block btn-outline" style="width: auto; font-size: 0.82rem;">
+          📋 Copy Scanner Link
+        </button>
+        <button id="btn-apply-room" type="button" class="btn-block btn-gradient-teal" style="flex: 1;">
+          🌊 Open This Tank →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom-Right Phone QR Code Card -->
+  <aside id="qr-card" class="qr-card">
+    <div class="qr-header">
+      <span>📱 Scan with Phone</span>
+      <button id="btn-toggle-qr" class="qr-toggle-btn" title="Minimize / Expand">▾</button>
+    </div>
+    <div class="qr-body">
+      <div
+        id="qr-room-badge"
+        style="font-size: 0.76rem; font-weight: 800; color: #5eead4; background: rgba(13, 148, 136, 0.22); border: 1px solid rgba(94, 234, 212, 0.35); border-radius: 999px; padding: 3px 10px; margin-bottom: 7px; display: inline-block;"
+      >
+        🔑 Code: WONDER-REEF
+      </div>
+      <div class="qr-img-box">
+        <img id="qr-code-img" alt="Scan QR Code to open Paper Scanner" />
+      </div>
+      <div class="qr-caption">
+        Color a printed sheet &amp; scan with your phone camera to watch it swim here live!
+      </div>
+      <div id="scan-url-text" class="qr-url"></div>
+    </div>
+  </aside>
+
+  <!-- Built-in Split-Screen Studio Drawer -->
+  <section id="studio-drawer" class="studio-drawer hidden">
+    <div class="drawer-header">
+      <span>✨ Live Scanner &amp; Coloring Sheet Studio</span>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <button id="btn-drawer-tab-sheets" type="button" class="hud-btn" style="padding: 4px 10px; font-size: 0.75rem;">🖍️ Sheets</button>
+        <button id="btn-drawer-tab-scan" type="button" class="hud-btn" style="padding: 4px 10px; font-size: 0.75rem;">📷 Scanner</button>
+        <a id="link-drawer-fulltab" href="./scan.html" target="_blank" rel="noopener" class="hud-btn" style="padding: 4px 10px; font-size: 0.75rem; text-decoration: none;" title="Open Scanner in Full Tab">↗ Tab</a>
+        <button id="btn-close-drawer" class="hud-btn" style="padding: 4px 9px; font-size: 0.75rem;">✕</button>
+      </div>
+    </div>
+    <iframe id="studio-iframe" src="about:blank" allow="camera; microphone; fullscreen; autoplay"></iframe>
+  </section>
+
+  <script type="module" src="./js/aquarium.js"></script>
+</body>
+</html>

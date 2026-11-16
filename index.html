@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color a Fish, Watch It Swim in a 3D Virtual Fish Tank — WonderLab AR</title>
+  <meta
+    name="description"
+    content="Kids color a fish on paper. Snap a photo with your phone and watch it pop out in 3D Web AR and swim live in your shared aquarium on any TV, laptop, or projector."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./css/landing.css" />
+</head>
+<body class="pmr-body">
+
+  <!-- ========================================================================
+       PLAY MAGIC REEF STYLE HEADER & FLOATING WHITE PILL NAVBAR
+       ======================================================================== -->
+  <header id="pmr-header" class="pmr-header">
+    <div class="pmr-header-inner">
+      <a href="./index.html" class="pmr-logo-link">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" class="pmr-logo-img" />
+      </a>
+
+      <nav class="pmr-center-pill" aria-label="Primary Navigation">
+        <a href="./index.html" class="pmr-nav-link active" data-i18n="nav_home">Home</a>
+        <a href="./how-it-works.html" class="pmr-nav-link" data-i18n="nav_how">How it works</a>
+        <a href="./pricing.html" class="pmr-nav-link" data-i18n="nav_pricing">Pricing</a>
+        <a href="./our-story.html" class="pmr-nav-link" data-i18n="nav_story">Our Story</a>
+        <a href="./tank-new.html" class="pmr-try-btn" data-i18n="nav_try">Try It Free</a>
+      </nav>
+
+      <div class="pmr-right-actions">
+        <a href="./scan.html" class="pmr-pill-white hide-sm" data-i18n="nav_scan">📷 Scan Sheet</a>
+        <button id="btn-lang-switch" type="button" class="pmr-lang-btn" title="Switch Language (EN / සිංහල)">
+          🌐 EN ▾
+        </button>
+        <button id="btn-mobile-menu" type="button" class="pmr-mobile-toggle">☰ Menu</button>
+      </div>
+    </div>
+
+    <div id="pmr-mobile-drawer" class="pmr-mobile-drawer">
+      <a href="./index.html" class="pmr-nav-link active">Home</a>
+      <a href="./how-it-works.html" class="pmr-nav-link">How it works</a>
+      <a href="./pricing.html" class="pmr-nav-link">Pricing</a>
+      <a href="./our-story.html" class="pmr-nav-link">Our Story</a>
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <a href="./scan.html" class="btn-pmr btn-pmr-white" style="flex: 1; padding: 10px;">📷 Scan Sheet</a>
+        <a href="./tank-new.html" class="btn-pmr btn-pmr-blue" style="flex: 1; padding: 10px;">Try It Free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       HERO SECTION — SUNNY STORYBOOK COPY + 3D CLAYMATION DIORAMA
+       ======================================================================== -->
+  <section class="home-hero">
+    <div class="home-hero-copy reveal-up">
+      <div class="wonder-eyebrow-pill" data-i18n="hero_eyebrow">
+        ✨ A 3D &amp; Web AR world made by them
+      </div>
+
+      <h1 class="home-hero-title">
+        <span data-i18n="hero_h1_1">A little scribble.</span><br />
+        <span class="highlight-coral" data-i18n="hero_h1_2">A sea of possibilities.</span>
+      </h1>
+
+      <p class="home-hero-sub" data-i18n="hero_sub">
+        Kids color a sea creature on paper. Snap a photo with any phone — watch it pop out in 3D Web AR and swim live in your shared aquarium!
+      </p>
+
+      <div class="home-hero-ctas">
+        <a href="./tank-new.html" class="btn-pmr btn-pmr-blue" data-i18n="hero_cta_primary">
+          Bring a fish to life
+        </a>
+        <a href="./how-it-works.html" class="btn-pmr btn-pmr-white" data-i18n="hero_cta_secondary">
+          See how it works
+        </a>
+      </div>
+
+      <div class="home-hero-note" data-i18n="hero_note">
+        6 3D creatures free · No app · No sign-up
+      </div>
+    </div>
+
+    <!-- Full-Bleed 3D Claymation Living Room Diorama (Matches image9.png!) -->
+    <div class="hero-clay-stage reveal-up">
+      <div class="hero-clay-img-wrap">
+        <img
+          src="./assets/clay/hero-family-reef.jpg"
+          alt="3D claymation family and kids coloring fish sheets with crayons while watching their 3D reef swim on the living-room TV"
+        />
+        <div class="hero-floating-badge-left">
+          🖍️ Print · Color · Scan with Phone
+        </div>
+        <div class="hero-floating-badge-right">
+          ✨ Includes Live Smartphone Web AR
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       3-ROW PLAYFUL PASTEL MARQUEE TICKER (PLAY MAGIC REEF STYLE)
+       ======================================================================== -->
+  <div class="pastel-marquee-wrap" aria-hidden="true">
+    <div class="pmr-marquee-row">
+      <span class="pastel-tag yellow">🖍️ Draw</span>
+      <span class="pastel-tag sky">✨ Interactive 3D</span>
+      <span class="pastel-tag peach">🎨 Creative Play</span>
+      <span class="pastel-tag mint">🌈 Imagination</span>
+      <span class="pastel-tag lilac">👨‍👩‍👧‍👦 Family-Friendly</span>
+      <span class="pastel-tag cream">📱 Live Web AR</span>
+      <span class="pastel-tag yellow">🔍 Curiosity</span>
+      <span class="pastel-tag sky">💛 Color Together</span>
+      <!-- Seamless duplicate -->
+      <span class="pastel-tag yellow">🖍️ Draw</span>
+      <span class="pastel-tag sky">✨ Interactive 3D</span>
+      <span class="pastel-tag peach">🎨 Creative Play</span>
+      <span class="pastel-tag mint">🌈 Imagination</span>
+      <span class="pastel-tag lilac">👨‍👩‍👧‍👦 Family-Friendly</span>
+      <span class="pastel-tag cream">📱 Live Web AR</span>
+      <span class="pastel-tag yellow">🔍 Curiosity</span>
+      <span class="pastel-tag sky">💛 Color Together</span>
+    </div>
+
+    <div class="pmr-marquee-row reverse">
+      <span class="pastel-tag mint">🐠 Visual Education</span>
+      <span class="pastel-tag cream">📖 Storytelling</span>
+      <span class="pastel-tag yellow">🙌 Participation</span>
+      <span class="pastel-tag peach">🛡️ Safe for Kids</span>
+      <span class="pastel-tag sky">🌊 Discovery</span>
+      <span class="pastel-tag lilac">🏫 Classroom Ready</span>
+      <span class="pastel-tag mint">⭐ Wonder</span>
+      <span class="pastel-tag peach">🎉 Party Fun</span>
+      <!-- Seamless duplicate -->
+      <span class="pastel-tag mint">🐠 Visual Education</span>
+      <span class="pastel-tag cream">📖 Storytelling</span>
+      <span class="pastel-tag yellow">🙌 Participation</span>
+      <span class="pastel-tag peach">🛡️ Safe for Kids</span>
+      <span class="pastel-tag sky">🌊 Discovery</span>
+      <span class="pastel-tag lilac">🏫 Classroom Ready</span>
+      <span class="pastel-tag mint">⭐ Wonder</span>
+      <span class="pastel-tag peach">🎉 Party Fun</span>
+    </div>
+
+    <div class="pmr-marquee-row">
+      <span class="pastel-tag peach">🎈 Playful</span>
+      <span class="pastel-tag yellow">✏️ Hand-Colored</span>
+      <span class="pastel-tag sky">📺 On the Big Screen</span>
+      <span class="pastel-tag lilac">🤝 Family Bonding</span>
+      <span class="pastel-tag mint">🧠 Joyful Learning</span>
+      <span class="pastel-tag cream">🪸 Ocean Wonder</span>
+      <span class="pastel-tag yellow">🚀 Comes Alive in 3D</span>
+      <span class="pastel-tag sky">🚫 No App Needed</span>
+      <!-- Seamless duplicate -->
+      <span class="pastel-tag peach">🎈 Playful</span>
+      <span class="pastel-tag yellow">✏️ Hand-Colored</span>
+      <span class="pastel-tag sky">📺 On the Big Screen</span>
+      <span class="pastel-tag lilac">🤝 Family Bonding</span>
+      <span class="pastel-tag mint">🧠 Joyful Learning</span>
+      <span class="pastel-tag cream">🪸 Ocean Wonder</span>
+      <span class="pastel-tag yellow">🚀 Comes Alive in 3D</span>
+      <span class="pastel-tag sky">🚫 No App Needed</span>
+    </div>
+  </div>
+
+  <!-- Cute Animated Swimming SVG Fish Strip -->
+  <div class="swimming-fish-strip" aria-hidden="true">
+    <svg class="swim-svg-fish" width="52" height="32" viewBox="0 0 52 32" fill="none">
+      <path d="M12 16L2 6V26L12 16Z" fill="#FF7A2F"/>
+      <ellipse cx="29" cy="16" rx="18" ry="11" fill="#FF7A2F"/>
+      <path d="M23 6.2C25 12 25 20 23 25.8" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+      <path d="M34 6.8C35.5 12 35.5 20 34 25.2" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="40" cy="13" r="2.3" fill="#171715"/>
+    </svg>
+    <svg class="swim-svg-fish f2" width="48" height="30" viewBox="0 0 48 30" fill="none">
+      <path d="M11 15L2 7V23L11 15Z" fill="#FACC15"/>
+      <ellipse cx="27" cy="15" rx="16" ry="10" fill="#2563EB"/>
+      <circle cx="37" cy="12.5" r="2.2" fill="#FFFFFF"/>
+      <circle cx="37.5" cy="12.5" r="1.1" fill="#171715"/>
+    </svg>
+    <svg class="swim-svg-fish f3" width="46" height="30" viewBox="0 0 46 30" fill="none">
+      <path d="M10 15L2 6V24L10 15Z" fill="#FF5876"/>
+      <ellipse cx="26" cy="15" rx="15" ry="10.5" fill="#FDE047"/>
+      <circle cx="35" cy="12.5" r="2.1" fill="#171715"/>
+    </svg>
+  </div>
+
+  <!-- ========================================================================
+       THE WHOLE IDEA + INTERACTIVE LIVE 3D AQUARIUM TV SHOWCASE
+       ======================================================================== -->
+  <section id="live-reef" class="whole-idea-section">
+    <div class="container">
+      <div class="editorial-center-head reveal-up">
+        <span class="uppercase-kicker" data-i18n="idea_kicker">THE WHOLE IDEA</span>
+        <h2 data-i18n="idea_title">
+          Every kid at the table colors a fish on paper, and the 3D reef fills up on the big screen.
+        </h2>
+        <p data-i18n="idea_sub">
+          Try our live 3D reef right inside the TV below — drop fish food, summon a friendly shark, or scan the QR code with your phone!
+        </p>
+      </div>
+
+      <div class="sunny-tv-grid reveal-up">
+        <!-- Warm Wooden Living-Room TV Cabinet -->
+        <div class="wooden-tv-cabinet">
+          <div class="wooden-tv-top">
+            <span class="live-green-pill">
+              <span class="live-green-dot"></span>
+              LIVE 3D AQUARIUM · PLAY RIGHT HERE
+            </span>
+            <span style="font-size: 0.82rem; font-weight: 600; color: var(--ink-muted);">
+              💡 Drag water to look around · Click any fish to see its paper drawing!
+            </span>
+          </div>
+
+          <div class="sunny-tv-screen">
+            <iframe
+              id="pmr-live-iframe"
+              src="./aquarium.html?embed=1&amp;tank=WONDER-REEF"
+              title="WonderLab AR Live 3D Virtual Fish Tank"
+              loading="lazy"
+            ></iframe>
+          </div>
+
+          <div class="sunny-tv-controls">
+            <div class="toy-btn-group">
+              <button id="btn-tv-feed" type="button" class="toy-btn">🍤 Drop Fish Food</button>
+              <button id="btn-tv-shark" type="button" class="toy-btn">🦈 Friendly Shark!</button>
+              <button id="btn-tv-labels" type="button" class="toy-btn">🏷️ Kids' Names</button>
+            </div>
+            <div class="toy-btn-group">
+              <a href="./tank-new.html" class="toy-btn">🔑 New Party Tank</a>
+              <a href="./aquarium.html?tank=WONDER-REEF" class="toy-btn blue-cta">⛶ Open Fullscreen Tank ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sunny Yellow QR Pitch Card -->
+        <aside class="sunny-qr-card">
+          <div>
+            <span class="uppercase-kicker" style="color: #713f12;">📱 SCAN WITH YOUR PHONE</span>
+            <h3 style="font-size: 1.75rem; margin-top: 6px;">Send a fish in seconds!</h3>
+            <p style="font-size: 0.9rem; color: #3f3c36; margin-top: 4px;">
+              Scan this code with your phone camera — no app needed!
+            </p>
+          </div>
+
+          <div class="sunny-qr-box">
+            <img id="pmr-qr-img" alt="QR Code to open mobile fish scanner" />
+          </div>
+
+          <div id="pmr-qr-url" style="font-size: 0.72rem; font-weight: 700; color: #78350f; word-break: break-all;"></div>
+
+          <div class="sunny-qr-steps">
+            <div><strong>No printer right now?</strong></div>
+            <div>1. Scan QR or tap below</div>
+            <div>2. Tap <strong>"Scan Demo →"</strong></div>
+            <div>3. Watch your fish splash into the TV!</div>
+          </div>
+
+          <a href="./scan.html" class="btn-pmr btn-pmr-blue" style="width: 100%; padding: 12px 18px; font-size: 0.92rem;">
+            📷 Open Phone Scanner →
+          </a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       HOW IT WORKS — 4 SUNNY PASTEL STEPS + 2 CLAYMATION HIGHLIGHTS
+       ======================================================================== -->
+  <section class="steps-pastel-section">
+    <div class="container">
+      <div class="editorial-center-head reveal-up">
+        <span class="uppercase-kicker">HOW IT WORKS</span>
+        <h2>Print. Color. Scan. Watch their fish swim.</h2>
+        <p>
+          Open the reef on any big screen, then color, send, and watch the fish swim in. No app, no sign-up.
+        </p>
+      </div>
+
+      <div class="steps-4-cards reveal-up">
+        <article class="pastel-step-card s1">
+          <div class="step-circle-num">01</div>
+          <h3>Print a sheet</h3>
+          <p>Print a free sea-creature page on plain A4 paper at 100% scale — with 4 little corner squares.</p>
+        </article>
+
+        <article class="pastel-step-card s2">
+          <div class="step-circle-num">02</div>
+          <h3>Color a fish</h3>
+          <p>Grab crayons, markers, or colored pencils! Every stripe, dot, and scribble becomes part of the 3D fish.</p>
+        </article>
+
+        <article class="pastel-step-card s3">
+          <div class="step-circle-num">03</div>
+          <h3>Snap &amp; see Web AR</h3>
+          <p>Take a photo in your phone's browser — see your 3D creature float right above the table in Live Camera AR!</p>
+        </article>
+
+        <article class="pastel-step-card s4">
+          <div class="step-circle-num">04</div>
+          <h3>Watch it swim</h3>
+          <p>Tap send and watch their creation splash onto the living-room TV or projector wearing their exact colors!</p>
+        </article>
+      </div>
+
+      <div style="text-align: center; margin-top: 38px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;" class="reveal-up">
+        <a href="./how-it-works.html" class="btn-pmr btn-pmr-blue">See all 4 screen setups →</a>
+        <a href="#coloring-pages" class="btn-pmr btn-pmr-oat">Get free fish coloring pages</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2-Column Claymation Preview (Paper -> TV & Paper -> Web AR) -->
+  <section class="four-ways-grid">
+    <article class="way-tile reveal-up">
+      <div class="way-photo-box">
+        <img src="./assets/clay/way-paper-tv.jpg" alt="Kids coloring fish on paper while mom scans onto the TV" />
+        <span class="way-pill-topleft">PAPER → PHONE → TV</span>
+        <span class="way-pill-topright">RECOMMENDED</span>
+      </div>
+      <div class="way-caption-box">
+        <div class="way-kicker">PAPER → PHONE → TV</div>
+        <h3>Crayons to the big screen</h3>
+        <p>
+          Kids color on paper, a parent snaps a photo with their phone, and the new 3D fish swims onto the living-room TV right away.
+        </p>
+      </div>
+    </article>
+
+    <article class="way-tile reveal-up">
+      <div class="way-photo-box">
+        <img src="./assets/clay/way-webar-phone.jpg" alt="Two kids holding phone and tablet seeing 3D fish float in Augmented Reality above their colored sheets" />
+        <span class="way-pill-topleft">PAPER → LIVE 3D WEB AR</span>
+      </div>
+      <div class="way-caption-box">
+        <div class="way-kicker">MAGIC ON EVERY PHONE</div>
+        <h3>Pops off the paper in 3D AR</h3>
+        <p>
+          Before swimming to the TV, every child gets to hold a phone over their drawing and watch their fish float in mid-air Augmented Reality!
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ========================================================================
+       FREE PRINTABLE SEA CREATURE COLORING PAGES
+       ======================================================================== -->
+  <section id="coloring-pages" class="sheets-sunny-section">
+    <div class="container">
+      <div class="editorial-center-head reveal-up">
+        <span class="uppercase-kicker" style="color: var(--wonder-blue);">FREE PRINTABLES</span>
+        <h2>Choose their first sea creature.</h2>
+        <p>
+          Pick a favorite below, download the A4 sheet (or the full 5-page PDF pack), and print at 100% actual size. No printer? Color online too!
+        </p>
+        <div style="margin-top: 22px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;">
+          <a
+            href="./coloring-sheets/All-5-Digital-Aquarium-Coloring-Sheets-A4.pdf"
+            download="All-5-Digital-Aquarium-Coloring-Sheets-A4.pdf"
+            class="btn-pmr btn-pmr-blue"
+          >
+            📄 Download All 5 Sheets (PDF)
+          </a>
+          <a href="./sheets.html" class="btn-pmr btn-pmr-white">
+            🖍️ Color Online (No Printer)
+          </a>
+        </div>
+      </div>
+
+      <div class="sheets-cards-grid">
+        <!-- Clownfish -->
+        <article class="sunny-sheet-card reveal-up">
+          <div
+            class="sunny-sheet-thumb"
+            data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-clownfish.png"
+            data-sheet-title="Clownfish"
+          >
+            <span class="a4-scale-pill">A4 · print at 100%</span>
+            <img src="./coloring-sheets/Digital-Aquarium-Sheet-clownfish.png" alt="Clownfish coloring sheet" class="sheet-img" />
+            <div class="colored-mini-badge">
+              <img src="./models/creatures/clownfish_colored.png" alt="Colored Clownfish" />
+            </div>
+          </div>
+          <div class="sunny-sheet-body">
+            <h3>🐠 Clownfish</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-soft);">Cheerful coral swimmer — looks amazing with rainbow stripes or polka dots!</p>
+            <div class="sunny-sheet-actions">
+              <button
+                type="button"
+                class="btn-pmr-oat"
+                style="border: 0;"
+                data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-clownfish.png"
+                data-sheet-title="Clownfish"
+              >
+                🔍 Preview
+              </button>
+              <a
+                href="./coloring-sheets/Digital-Aquarium-Sheet-clownfish.png"
+                download="Digital-Aquarium-Sheet-clownfish.png"
+                class="btn-pmr-blue"
+                style="color: #fff;"
+              >
+                ⬇️ Download A4
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Angelfish -->
+        <article class="sunny-sheet-card reveal-up">
+          <div
+            class="sunny-sheet-thumb"
+            data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-angelfish.png"
+            data-sheet-title="Angelfish"
+          >
+            <span class="a4-scale-pill">A4 · print at 100%</span>
+            <img src="./coloring-sheets/Digital-Aquarium-Sheet-angelfish.png" alt="Angelfish coloring sheet" class="sheet-img" />
+            <div class="colored-mini-badge">
+              <img src="./models/creatures/angelfish_colored.png" alt="Colored Angelfish" />
+            </div>
+          </div>
+          <div class="sunny-sheet-body">
+            <h3>🐟 Angelfish</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-soft);">Big graceful fins give little artists plenty of room to get creative.</p>
+            <div class="sunny-sheet-actions">
+              <button
+                type="button"
+                class="btn-pmr-oat"
+                style="border: 0;"
+                data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-angelfish.png"
+                data-sheet-title="Angelfish"
+              >
+                🔍 Preview
+              </button>
+              <a
+                href="./coloring-sheets/Digital-Aquarium-Sheet-angelfish.png"
+                download="Digital-Aquarium-Sheet-angelfish.png"
+                class="btn-pmr-blue"
+                style="color: #fff;"
+              >
+                ⬇️ Download A4
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Blue Tang -->
+        <article class="sunny-sheet-card reveal-up">
+          <div
+            class="sunny-sheet-thumb"
+            data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-bluetang.png"
+            data-sheet-title="Blue Reef Tang"
+          >
+            <span class="a4-scale-pill">A4 · print at 100%</span>
+            <img src="./coloring-sheets/Digital-Aquarium-Sheet-bluetang.png" alt="Blue Tang coloring sheet" class="sheet-img" />
+            <div class="colored-mini-badge">
+              <img src="./models/creatures/bluetang_colored.png" alt="Colored Blue Tang" />
+            </div>
+          </div>
+          <div class="sunny-sheet-body">
+            <h3>🐟 Blue Reef Tang</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-soft);">Fast, playful swimmer that zooms right up when kids drop fish food!</p>
+            <div class="sunny-sheet-actions">
+              <button
+                type="button"
+                class="btn-pmr-oat"
+                style="border: 0;"
+                data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-bluetang.png"
+                data-sheet-title="Blue Reef Tang"
+              >
+                🔍 Preview
+              </button>
+              <a
+                href="./coloring-sheets/Digital-Aquarium-Sheet-bluetang.png"
+                download="Digital-Aquarium-Sheet-bluetang.png"
+                class="btn-pmr-blue"
+                style="color: #fff;"
+              >
+                ⬇️ Download A4
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Seahorse -->
+        <article class="sunny-sheet-card reveal-up">
+          <div
+            class="sunny-sheet-thumb"
+            data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-seahorse.png"
+            data-sheet-title="Seahorse"
+          >
+            <span class="a4-scale-pill">A4 · print at 100%</span>
+            <img src="./coloring-sheets/Digital-Aquarium-Sheet-seahorse.png" alt="Seahorse coloring sheet" class="sheet-img" />
+            <div class="colored-mini-badge">
+              <img src="./models/creatures/seahorse_colored.png" alt="Colored Seahorse" />
+            </div>
+          </div>
+          <div class="sunny-sheet-body">
+            <h3>🪸 Seahorse</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-soft);">Glides gently up and down through the coral garden with a curly tail.</p>
+            <div class="sunny-sheet-actions">
+              <button
+                type="button"
+                class="btn-pmr-oat"
+                style="border: 0;"
+                data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-seahorse.png"
+                data-sheet-title="Seahorse"
+              >
+                🔍 Preview
+              </button>
+              <a
+                href="./coloring-sheets/Digital-Aquarium-Sheet-seahorse.png"
+                download="Digital-Aquarium-Sheet-seahorse.png"
+                class="btn-pmr-blue"
+                style="color: #fff;"
+              >
+                ⬇️ Download A4
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Starfish & Crab -->
+        <article class="sunny-sheet-card reveal-up">
+          <div
+            class="sunny-sheet-thumb"
+            data-sheet-preview="./coloring-sheets/Digital-Aquarium-Sheet-starfish.png"
+            data-sheet-title="Sea Star"
+          >
+            <span class="a4-scale-pill">A4 · Starfish &amp; Crab</span>
+            <img src="./coloring-sheets/Digital-Aquarium-Sheet-starfish.png" alt="Starfish coloring sheet" class="sheet-img" />
+            <div class="colored-mini-badge">
+              <img src="./models/creatures/starfish_colored.png" alt="Colored Starfish" />
+            </div>
+          </div>
+          <div class="sunny-sheet-body">
+            <h3>⭐ Sea Star &amp; 🦀 Crab</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-soft);">Friendly sandy-bottom buddies — open our Crayon Studio to print Crab too!</p>
+            <div class="sunny-sheet-actions">
+              <a href="./sheets.html" class="btn-pmr-oat" style="color: var(--ink);">🦀 Crab Sheet</a>
+              <a
+                href="./coloring-sheets/Digital-Aquarium-Sheet-starfish.png"
+                download="Digital-Aquarium-Sheet-starfish.png"
+                class="btn-pmr-blue"
+                style="color: #fff;"
+              >
+                ⬇️ Starfish
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Custom Venue / Event Mascot Card -->
+        <article class="sunny-sheet-card reveal-up" style="background: linear-gradient(160deg, #fff6cc 0%, #ffe4ea 100%); border-color: rgba(255, 88, 118, 0.25);">
+          <div class="sunny-sheet-thumb" style="background: transparent; flex-direction: column; text-align: center; gap: 8px; cursor: default;">
+            <div style="font-size: 3.1rem;">🎨🐋✨</div>
+            <div style="font-weight: 800; font-size: 1.1rem; color: var(--ink);">Custom Event Creatures</div>
+            <div style="font-size: 0.84rem; color: var(--ink-soft); max-width: 240px;">
+              Your venue logo on every sheet + custom 3D mascots!
+            </div>
+          </div>
+          <div class="sunny-sheet-body">
+            <h3>🎈 Custom Venue Edition</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-soft);">Hosting a museum exhibit, mall activation, or branded kids event? We tailor the reef to you!</p>
+            <div class="sunny-sheet-actions">
+              <a href="./pricing.html" class="btn-pmr-coral" style="color: #fff;">✨ See Venue Plans</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MADE FOR EVERY GATHERING (01 / 03, 02 / 03, 03 / 03 CLAY DIORAMAS)
+       ======================================================================== -->
+  <section class="gatherings-section">
+    <div class="container">
+      <div class="editorial-center-head reveal-up">
+        <span class="uppercase-kicker">MADE FOR EVERY GATHERING</span>
+        <h2>From rainy afternoons to giant party walls.</h2>
+        <p>One link turns any screen into a joyful, shared ocean.</p>
+      </div>
+
+      <div class="gatherings-list">
+        <!-- 01 / 03 -->
+        <article class="gathering-card reveal-up">
+          <div class="gathering-img">
+            <img src="./assets/clay/way-projector.jpg" alt="3D claymation kids at a birthday party coloring fish in front of a projected reef wall" />
+          </div>
+          <div class="gathering-info">
+            <span class="gathering-num">01 / 03</span>
+            <h3>Family Gatherings &amp; Birthday Parties</h3>
+            <p>
+              Every kid at the party draws their own fish, writes their name, and cheers as it splashes into the birthday tank! Plus they take their coloring home as a keepsake.
+            </p>
+            <div class="gathering-pills">
+              <span>🎂 Birthday Favorite</span>
+              <span>📺 TV or Wall Projector</span>
+              <span>🚫 No Subscription Needed</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 02 / 03 -->
+        <article class="gathering-card reverse reveal-up">
+          <div class="gathering-img">
+            <img src="./assets/clay/classroom-clay.jpg" alt="3D claymation teacher and diverse classroom kids scanning colored fish onto a classroom screen" />
+          </div>
+          <div class="gathering-info">
+            <span class="gathering-num">02 / 03</span>
+            <h3>Classrooms &amp; Preschools</h3>
+            <p>
+              A living ocean the whole class builds together — blending hands-on art with real 3D &amp; Augmented Reality discovery on your classroom smartboard or projector.
+            </p>
+            <div class="gathering-pills">
+              <span>🏫 Smartboard Ready</span>
+              <span>🏷️ Student Name Badges</span>
+              <span>🛡️ 100% Kid-Safe</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 03 / 03 -->
+        <article class="gathering-card reveal-up">
+          <div class="gathering-img">
+            <img src="./assets/clay/venue-museum-clay.jpg" alt="3D claymation museum and play center visitors coloring fish in front of a giant digital reef wall" />
+          </div>
+          <div class="gathering-info">
+            <span class="gathering-num">03 / 03</span>
+            <h3>Venues, Malls &amp; Exhibitions</h3>
+            <p>
+              Museums, restaurants, resorts, kids play centers, and brand events. Your custom logo, custom 3D sea creatures, big screens running smoothly all day!
+            </p>
+            <div class="gathering-pills">
+              <span>🏛️ White-Label Branding</span>
+              <span>🧱 Custom 3D Mascots</span>
+              <span>🔐 PIN Admin Reset</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       START YOUR TANK IN SECONDS — SUNSHINE YELLOW BOTTOM CTA
+       ======================================================================== -->
+  <section class="bottom-sunny-cta">
+    <div class="container reveal-up">
+      <h2>Start your tank in seconds</h2>
+      <p>
+        Open it on any big screen, share the QR code, and watch the kids' colored fish roll in.
+      </p>
+      <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;">
+        <a href="./tank-new.html" class="btn-pmr btn-pmr-blue">Try It Free (Get Tank Code)</a>
+        <a href="./pricing.html" class="btn-pmr btn-pmr-white">View Passes &amp; Venue Plans</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="pmr-footer">
+    <div class="container pmr-footer-row">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" style="height: 24px; width: auto;" />
+        <span>© 2026 WonderLab AR · 3D Digital Aquarium &amp; Web AR</span>
+      </div>
+
+      <div class="pmr-footer-links">
+        <a href="./index.html">Home</a>
+        <a href="./how-it-works.html">How it works</a>
+        <a href="./sheets.html">Coloring Pages</a>
+        <a href="./pricing.html">Pricing</a>
+        <a href="./our-story.html">Our Story</a>
+        <a href="./aquarium.html">Launch 3D Tank</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       SHEET PREVIEW LIGHTBOX
+       ======================================================================== -->
+  <div id="pmr-lightbox" class="pmr-lightbox hidden">
+    <div class="pmr-lightbox-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+        <h3 id="pmr-lb-title" style="font-size: 1.35rem;">Printable A4 Sheet</h3>
+        <button id="pmr-lb-close" type="button" class="pmr-lang-btn">✕</button>
+      </div>
+      <div class="pmr-lightbox-img">
+        <img id="pmr-lb-img" src="" alt="Printable A4 Coloring Sheet" />
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a id="pmr-lb-dl" href="#" download class="btn-pmr btn-pmr-blue" style="flex: 1; padding: 12px; font-size: 0.9rem;">
+          ⬇️ Download A4 Sheet
+        </a>
+        <a href="./sheets.html" class="btn-pmr btn-pmr-oat" style="flex: 1; padding: 12px; font-size: 0.9rem;">
+          🖍️ Color Online →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/landing.js"></script>
+</body>
+</html>

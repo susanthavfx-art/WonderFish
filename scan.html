@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Scan Coloring Sheet • 3D Digital Aquarium</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <script src="./vendor/supabase.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body class="scanner-body">
+  <div class="mobile-shell">
+    <!-- Top Mini Navigation -->
+    <nav class="sub-topbar">
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <a href="./index.html" class="hud-btn" title="Website Home" style="text-decoration: none;">🏠</a>
+        <a id="nav-link-aquarium" href="./aquarium.html" class="hud-btn" style="text-decoration: none;">🌊 Aquarium</a>
+      </div>
+      <div class="sub-brand">
+        <img src="./assets/wonderlab-ar-logo.png" alt="WonderLab AR" class="brand-logo sub-logo" />
+        <span style="font-weight: 800; font-size: 0.88rem; color: #67e8f9;">📷 Paper Sheet Scanner</span>
+      </div>
+      <a id="nav-link-sheets" href="./sheets.html" class="hud-btn" style="text-decoration: none;">🖨️ Sheets</a>
+    </nav>
+
+    <!-- Active Tank Code Bar (Play Magic Reef Room Selector) -->
+    <div
+      style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 14px; margin-bottom: 12px; border-radius: 14px; background: rgba(13, 148, 136, 0.18); border: 1px solid rgba(94, 234, 212, 0.38);"
+    >
+      <span style="font-size: 0.78rem; font-weight: 800; color: #99f6e4; white-space: nowrap;">🔑 Tank Code:</span>
+      <input
+        id="scanner-room-input"
+        type="text"
+        maxlength="28"
+        value="WONDER-REEF"
+        placeholder="e.g. LEO-PARTY"
+        style="flex: 1; min-width: 0; background: rgba(2, 12, 27, 0.65); border: 1px solid rgba(125, 211, 252, 0.35); border-radius: 9px; padding: 6px 10px; color: #ffffff; font-weight: 800; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; outline: none;"
+      />
+      <button id="btn-set-scanner-room" type="button" class="hud-btn" style="padding: 6px 12px; font-size: 0.76rem;">
+        ✓ Set
+      </button>
+    </div>
+
+    <!-- STEP 1: CAMERA SCANNER / PHOTO UPLOAD / INSTANT SAMPLE DEMO -->
+    <section id="step-capture" class="panel-card">
+      <span class="step-badge">STEP 1 • SCAN PAPER SHEET</span>
+      <h1 class="panel-title">පාට කරපු කොළේ Scan කරන්න 🎨</h1>
+      <p class="panel-desc">
+        Print කරලා පාට කරපු මාළුවාගේ කොළේ (කොන් 4 කළු කොටු පේන විදියට) Camera එකට අල්ලන්න.
+      </p>
+
+      <!-- Live Camera Box -->
+      <div id="camera-live-box" class="hidden">
+        <div class="camera-stage">
+          <video id="camera-video" playsinline webkit-playsinline muted autoplay></video>
+          <canvas id="camera-overlay"></canvas>
+          <div id="live-detect-status" class="detect-banner">
+            🔍 Align the 4 black corner squares...
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-shutter" class="btn-block btn-gradient-teal" style="flex: 1;">
+            📸 Capture &amp; Make 3D!
+          </button>
+          <button id="btn-switch-camera" class="btn-block btn-outline" style="width: auto; padding: 13px 14px;" title="Switch / Flip Camera">
+            🔄
+          </button>
+          <button id="btn-stop-camera" class="btn-block btn-outline" style="width: auto; padding: 13px 16px;" title="Close Camera">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Idle Camera Launch & Photo Upload Buttons -->
+      <div id="camera-idle-box">
+        <button id="btn-start-camera" class="btn-block btn-gradient-teal" style="margin-bottom: 10px;">
+          📷 Open Live Camera Scanner
+        </button>
+
+        <div id="camera-error-box" class="hidden" style="margin-bottom: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(248, 113, 113, 0.45); color: #fecaca; font-size: 0.8rem; line-height: 1.45;">
+          <div id="camera-error-text" style="margin-bottom: 8px;"></div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="./scan.html" target="_blank" rel="noopener" class="hud-btn" style="text-decoration: none; padding: 6px 12px; font-size: 0.76rem; background: rgba(56, 189, 248, 0.22); border-color: rgba(56, 189, 248, 0.5); color: #e0f2fe;">
+              ↗ Open Scanner in Full Tab
+            </a>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <label class="btn-block btn-outline" style="cursor: pointer; flex: 1; text-align: center;">
+            📱 Phone Camera
+            <input id="camera-capture-input" type="file" accept="image/*" capture="environment" class="hidden" />
+          </label>
+          <label class="btn-block btn-outline" style="cursor: pointer; flex: 1; text-align: center;">
+            🖼️ Upload Photo
+            <input id="file-upload-input" type="file" accept="image/*" class="hidden" />
+          </label>
+        </div>
+      </div>
+
+      <div class="divider-label">— OR TEST WITHOUT A PRINTER RIGHT NOW —</div>
+
+      <!-- Instant Angled Desk Photo Computer Vision Demo -->
+      <div class="sample-box">
+        <div style="font-size: 0.82rem; font-weight: 700; color: #7dd3fc; margin-bottom: 6px;">
+          ✨ Demo: Test with Sample Colored Paper Photo
+        </div>
+        <p style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 10px;">
+          Generates an angled photo of a crayon-colored paper sheet on a wooden table &amp; runs 4-corner marker detection + perspective unwarp! (Or color your own virtual paper in <a href="./sheets.html" style="color: #38bdf8;">Coloring Sheets</a>!)
+        </p>
+        <div style="display: flex; gap: 8px;">
+          <select id="sample-species-select" class="select-input" style="flex: 1;"></select>
+          <button id="btn-try-sample" class="btn-block btn-gradient-coral" style="width: auto; padding: 10px 16px;">
+            Scan Demo →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: INTERACTIVE 4-CORNER PIN CROP FINE-TUNER -->
+    <section id="step-crop" class="panel-card hidden">
+      <span class="step-badge">ALIGN 4 CORNERS</span>
+      <h2 class="panel-title">කොළේ කොන් 4 සකසන්න 📐</h2>
+      <p class="panel-desc">
+        Drag the 4 pins (TL, TR, BR, BL) onto the 4 corner squares of your coloring sheet so we can unwarp it cleanly.
+      </p>
+      <canvas id="crop-editor-canvas"></canvas>
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-back-capture" class="btn-block btn-outline" style="width: auto;">← Back</button>
+        <button id="btn-apply-crop" class="btn-block btn-gradient-teal" style="flex: 1;">
+          ✨ Unwarp &amp; Build 3D Fish!
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: 3D STUDIO & LIVE PHONE CAMERA AR PREVIEW + SEND TO AQUARIUM -->
+    <section id="step-preview" class="panel-card hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px;">
+        <span id="crop-auto-badge" class="step-badge" style="margin-bottom: 0;">✅ 3D &amp; AR READY</span>
+        <div style="display: flex; gap: 6px;">
+          <button id="btn-test-creature-glb" class="hud-btn" style="font-size: 0.74rem; padding: 4px 9px;" title="Test your own Blender .GLB creature with this scanned UV texture!">
+            📦 Test .GLB
+          </button>
+          <input id="test-creature-glb-input" type="file" accept=".glb,.gltf" class="hidden" />
+          <button id="btn-adjust-corners" class="hud-btn" style="font-size: 0.74rem; padding: 4px 10px;">
+            🔧 Adjust Corners
+          </button>
+        </div>
+      </div>
+
+      <div class="preview-mode-tabs">
+        <button id="btn-mode-3d" class="mode-tab active-tab">🌊 3D Orbit Preview</button>
+        <button id="btn-mode-ar" class="mode-tab">📱 Live Camera AR</button>
+      </div>
+
+      <div class="ar-stage-wrap">
+        <video id="ar-bg-video" class="hidden" playsinline muted autoplay></video>
+        <div id="preview-3d-stage"></div>
+      </div>
+
+      <div class="thumbs-row">
+        <img id="source-photo-thumb" alt="Captured angled sheet" title="Detected 4-Corner Paper Photo" />
+        <span style="color: #38bdf8; font-weight: 800;">→</span>
+        <img id="unwarped-thumb" alt="Unwarped 512x512 UV" title="Perspective-Unwarped UV Texture" />
+        <div style="flex: 1; min-width: 0;">
+          <select id="species-override-select" class="select-input" style="padding: 6px 8px; font-size: 0.82rem; margin-bottom: 5px;"></select>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: #cbd5e1; cursor: pointer;">
+            <input id="chk-crisp-ink" type="checkbox" checked />
+            Keep crisp lines &amp; eyes
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #bae6fd; margin-bottom: 5px;">
+          🎨 ඔයාගේ නම / Artist Name:
+        </label>
+        <input
+          id="artist-name-input"
+          type="text"
+          maxlength="24"
+          placeholder="උදා: Shenal / Amaya"
+          class="text-input"
+        />
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-rescan" class="btn-block btn-outline" style="width: auto;">↺ Rescan</button>
+        <button id="btn-send-aquarium" class="btn-block btn-gradient-coral" style="flex: 1;">
+          🚀 Aquarium එකට යවන්න!
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4: SUCCESS CELEBRATION + REMOTE INTERACTION -->
+    <section id="step-sent" class="panel-card hidden" style="text-align: center;">
+      <div style="font-size: 3.2rem; margin-bottom: 8px;">🎉🐠🌊</div>
+      <h2 class="panel-title" style="color: #5eead4;">Aquarium එකට ගියා!</h2>
+      <p id="sent-summary-text" class="panel-desc"></p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+        <button id="btn-remote-feed" class="btn-block btn-outline" style="font-size: 0.84rem;">
+          🍤 Drop Food
+        </button>
+        <button id="btn-remote-shark" class="btn-block btn-outline" style="font-size: 0.84rem;">
+          🦈 Summon Shark!
+        </button>
+      </div>
+
+      <button id="btn-scan-another" class="btn-block btn-gradient-teal" style="margin-bottom: 8px;">
+        🎨 තවත් කොළයක් Scan කරන්න
+      </button>
+      <a id="sent-link-aquarium" href="./aquarium.html" class="btn-block btn-outline" style="text-decoration: none;">
+        🌊 View 3D Digital Aquarium
+      </a>
+    </section>
+  </div>
+
+  <script type="module" src="./js/scanner.js"></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How the Virtual Fish Tank Works · WonderLab AR</title>
+  <meta
+    name="description"
+    content="One reef, any screen. Discover four easy ways to set up WonderLab AR's 3D Digital Aquarium & Web AR on your TV, laptop, tablet, or wall projector."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./css/landing.css" />
+</head>
+<body class="pmr-body">
+
+  <!-- ========================================================================
+       SIGNATURE FLOATING PILL NAVBAR (How it works active!)
+       ======================================================================== -->
+  <header id="pmr-header" class="pmr-header">
+    <div class="pmr-header-inner">
+      <a href="./index.html" class="pmr-logo-link">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" class="pmr-logo-img" />
+      </a>
+
+      <nav class="pmr-center-pill" aria-label="Primary Navigation">
+        <a href="./index.html" class="pmr-nav-link" data-i18n="nav_home">Home</a>
+        <a href="./how-it-works.html" class="pmr-nav-link active" data-i18n="nav_how">How it works</a>
+        <a href="./pricing.html" class="pmr-nav-link" data-i18n="nav_pricing">Pricing</a>
+        <a href="./our-story.html" class="pmr-nav-link" data-i18n="nav_story">Our Story</a>
+        <a href="./tank-new.html" class="pmr-try-btn" data-i18n="nav_try">Try It Free</a>
+      </nav>
+
+      <div class="pmr-right-actions">
+        <a href="./scan.html" class="pmr-pill-white hide-sm" data-i18n="nav_scan">📷 Scan Sheet</a>
+        <button id="btn-lang-switch" type="button" class="pmr-lang-btn">🌐 EN ▾</button>
+        <button id="btn-mobile-menu" type="button" class="pmr-mobile-toggle">☰ Menu</button>
+      </div>
+    </div>
+
+    <div id="pmr-mobile-drawer" class="pmr-mobile-drawer">
+      <a href="./index.html" class="pmr-nav-link">Home</a>
+      <a href="./how-it-works.html" class="pmr-nav-link active">How it works</a>
+      <a href="./pricing.html" class="pmr-nav-link">Pricing</a>
+      <a href="./our-story.html" class="pmr-nav-link">Our Story</a>
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <a href="./scan.html" class="btn-pmr btn-pmr-white" style="flex: 1; padding: 10px;">📷 Scan Sheet</a>
+        <a href="./aquarium.html" class="btn-pmr btn-pmr-blue" style="flex: 1; padding: 10px;">Try It Free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       SUNSHINE YELLOW EDITORIAL HERO ("One reef. Any screen." — Matches A.png!)
+       ======================================================================== -->
+  <section class="sunshine-banner">
+    <div class="container sunshine-grid reveal-up">
+      <div>
+        <h1 class="sunshine-giant-serif">
+          One reef.<br />
+          Any screen.
+        </h1>
+        <div class="uppercase-kicker" style="color: #1f1e1b; font-weight: 700;">
+          COLOR IT · SEND IT · WATCH IT SWIM
+        </div>
+      </div>
+
+      <div class="sunshine-right-meta">
+        <div class="uppercase-kicker" style="color: #3f3c34;">FOUR WAYS</div>
+        <div class="meta-title">Pick whichever matches your house or venue.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       2x2 EDGE-TO-EDGE 3D CLAYMATION DIORAMA GRID (Matches B.png & C.png!)
+       ======================================================================== -->
+  <section class="four-ways-grid">
+    <!-- Way 1: PAPER -> PHONE -> TV -->
+    <article class="way-tile reveal-up">
+      <div class="way-photo-box">
+        <img
+          src="./assets/clay/way-paper-tv.jpg"
+          alt="3D claymation kids coloring fish on paper while mom photographs the sheet onto the TV"
+        />
+        <span class="way-pill-topleft">PAPER → PHONE → TV</span>
+        <span class="way-pill-topright">RECOMMENDED</span>
+      </div>
+      <div class="way-caption-box">
+        <div class="way-kicker">PAPER → PHONE → TV</div>
+        <h3>Crayons to the big screen</h3>
+        <p>
+          Kids color on paper, a parent snaps a photo with their phone, and the new 3D fish swims onto the living-room TV.
+        </p>
+      </div>
+    </article>
+
+    <!-- Way 2: PAPER -> PHONE & TABLET AR -->
+    <article class="way-tile reveal-up">
+      <div class="way-photo-box">
+        <img
+          src="./assets/clay/way-webar-phone.jpg"
+          alt="Two claymation kids holding phone and tablet seeing 3D fish pop out in Web AR and swim on TV"
+        />
+        <span class="way-pill-topleft">PHONE &amp; TABLET AR → TV</span>
+      </div>
+      <div class="way-caption-box">
+        <div class="way-kicker">PHONE &amp; TABLET AR → TV</div>
+        <h3>Everyone scans at once (+ Live Web AR!)</h3>
+        <p>
+          One kid on a tablet, another on a phone — every creation floats above their desk in 3D AR and joins the same reef on the TV.
+        </p>
+      </div>
+    </article>
+
+    <!-- Way 3: PHONE -> LAPTOP -->
+    <article class="way-tile reveal-up">
+      <div class="way-photo-box">
+        <img
+          src="./assets/clay/way-laptop.jpg"
+          alt="Claymation grandma and child scanning a colored fish sheet next to a laptop displaying the reef"
+        />
+        <span class="way-pill-topleft">PHONE → LAPTOP</span>
+      </div>
+      <div class="way-caption-box">
+        <div class="way-kicker">PHONE → LAPTOP</div>
+        <h3>No TV? A laptop works</h3>
+        <p>
+          Scan with a phone and let a laptop be the aquarium — perfect for trips, rainy days, client demos, or grandma's house.
+        </p>
+      </div>
+    </article>
+
+    <!-- Way 4: PAPER -> PROJECTOR -->
+    <article class="way-tile reveal-up">
+      <div class="way-photo-box">
+        <img
+          src="./assets/clay/way-projector.jpg"
+          alt="Claymation kids at a birthday party coloring fish sheets in front of a giant wall-projected coral reef"
+        />
+        <span class="way-pill-topleft">PAPER → PROJECTOR</span>
+      </div>
+      <div class="way-caption-box">
+        <div class="way-kicker">PAPER → PROJECTOR</div>
+        <h3>A reef the size of a wall</h3>
+        <p>
+          Plug in a projector or LED wall and turn a birthday party, classroom, or museum hall into a giant, glowing 3D aquarium.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ========================================================================
+       COMMON QUESTIONS (PLAY MAGIC REEF LIGHT ACCORDION)
+       ======================================================================== -->
+  <section style="padding: 88px 0; background: var(--cream-bg);">
+    <div class="container">
+      <div class="editorial-center-head reveal-up">
+        <span class="uppercase-kicker">COMMON QUESTIONS</span>
+        <h2>That's the whole setup.</h2>
+        <p>One thing to color on, one screen to show it. Here is everything parents &amp; hosts ask.</p>
+      </div>
+
+      <div class="pmr-faq-wrap reveal-up">
+        <div class="pmr-faq-item open">
+          <button type="button" class="pmr-faq-q">
+            <span>Do the kids need to download an app?</span>
+            <span class="pmr-faq-plus">+</span>
+          </button>
+          <div class="pmr-faq-a">
+            No! They simply scan the QR code shown on your tank screen and snap a photo right inside their phone's browser (Safari or Chrome) — nothing to install.
+          </div>
+        </div>
+
+        <div class="pmr-faq-item">
+          <button type="button" class="pmr-faq-q">
+            <span>Can I show the reef on our TV or projector?</span>
+            <span class="pmr-faq-plus">+</span>
+          </button>
+          <div class="pmr-faq-a">
+            Yes. Open your tank in any browser and cast or plug an HDMI cable into your TV or projector. Hit fullscreen (⛶) — the 3D reef fills the screen, and every new fish swims in live as the kids add them!
+          </div>
+        </div>
+
+        <div class="pmr-faq-item">
+          <button type="button" class="pmr-faq-q">
+            <span>Where do I find templates to print for the kids?</span>
+            <span class="pmr-faq-plus">+</span>
+          </button>
+          <div class="pmr-faq-a">
+            We have free printable A4 coloring sheets with 4 corner squares so the phone camera recognizes and straightens the drawing automatically.
+            <div style="margin-top: 10px;">
+              <a href="./sheets.html" style="color: var(--wonder-blue); font-weight: 700;">Browse &amp; print coloring pages →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="pmr-faq-item">
+          <button type="button" class="pmr-faq-q">
+            <span>Can several kids add fish at the exact same time?</span>
+            <span class="pmr-faq-plus">+</span>
+          </button>
+          <div class="pmr-faq-a">
+            Yes! Everyone scans on their own phone or tablet at once, and all their fish splash together into the same shared 3D reef in real time.
+          </div>
+        </div>
+
+        <div class="pmr-faq-item">
+          <button type="button" class="pmr-faq-q">
+            <span>What if we don't have a printer handy?</span>
+            <span class="pmr-faq-plus">+</span>
+          </button>
+          <div class="pmr-faq-a">
+            Open <a href="./sheets.html" style="color: var(--wonder-blue); font-weight: 700;">Coloring Sheets</a> and click <strong>"🖍️ Test Color Here (No Printer)"</strong> to color with virtual crayons right on your screen and send it straight into the 3D reef!
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       BOTTOM SUNSHINE CTA & FOOTER
+       ======================================================================== -->
+  <section class="bottom-sunny-cta">
+    <div class="container reveal-up">
+      <h2>Start your tank in seconds</h2>
+      <p>Open it on any big screen, share the code, and watch the fish roll in.</p>
+      <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;">
+        <a href="./tank-new.html" class="btn-pmr btn-pmr-blue">Try It Free</a>
+        <a href="./sheets.html" class="btn-pmr btn-pmr-white">Free Coloring Pages</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pmr-footer">
+    <div class="container pmr-footer-row">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" style="height: 24px; width: auto;" />
+        <span>© 2026 WonderLab AR · 3D Digital Aquarium &amp; Web AR</span>
+      </div>
+      <div class="pmr-footer-links">
+        <a href="./index.html">Home</a>
+        <a href="./how-it-works.html">How it works</a>
+        <a href="./sheets.html">Coloring Pages</a>
+        <a href="./pricing.html">Pricing</a>
+        <a href="./our-story.html">Our Story</a>
+        <a href="./aquarium.html">Launch 3D Tank</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="./js/landing.js"></script>
+</body>
+</html>

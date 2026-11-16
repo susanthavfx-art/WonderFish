@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing — Start Free, No App · WonderLab AR</title>
+  <meta
+    name="description"
+    content="Simple pricing for families, birthday parties, classrooms, and venues. Start free with no app to install and no sign-up required for kids."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./css/landing.css" />
+  <script src="./vendor/supabase.js"></script>
+</head>
+<body class="pmr-body">
+
+  <!-- ========================================================================
+       SIGNATURE FLOATING PILL NAVBAR (Pricing active!)
+       ======================================================================== -->
+  <header id="pmr-header" class="pmr-header">
+    <div class="pmr-header-inner">
+      <a href="./index.html" class="pmr-logo-link">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" class="pmr-logo-img" />
+      </a>
+
+      <nav class="pmr-center-pill" aria-label="Primary Navigation">
+        <a href="./index.html" class="pmr-nav-link" data-i18n="nav_home">Home</a>
+        <a href="./how-it-works.html" class="pmr-nav-link" data-i18n="nav_how">How it works</a>
+        <a href="./pricing.html" class="pmr-nav-link active" data-i18n="nav_pricing">Pricing</a>
+        <a href="./our-story.html" class="pmr-nav-link" data-i18n="nav_story">Our Story</a>
+        <a href="./tank-new.html" class="pmr-try-btn" data-i18n="nav_try">Try It Free</a>
+      </nav>
+
+      <div class="pmr-right-actions">
+        <a href="./scan.html" class="pmr-pill-white hide-sm" data-i18n="nav_scan">📷 Scan Sheet</a>
+        <button id="btn-lang-switch" type="button" class="pmr-lang-btn">🌐 EN ▾</button>
+        <button id="btn-mobile-menu" type="button" class="pmr-mobile-toggle">☰ Menu</button>
+      </div>
+    </div>
+
+    <div id="pmr-mobile-drawer" class="pmr-mobile-drawer">
+      <a href="./index.html" class="pmr-nav-link">Home</a>
+      <a href="./how-it-works.html" class="pmr-nav-link">How it works</a>
+      <a href="./pricing.html" class="pmr-nav-link active">Pricing</a>
+      <a href="./our-story.html" class="pmr-nav-link">Our Story</a>
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <a href="./scan.html" class="btn-pmr btn-pmr-white" style="flex: 1; padding: 10px;">📷 Scan Sheet</a>
+        <a href="./aquarium.html" class="btn-pmr btn-pmr-blue" style="flex: 1; padding: 10px;">Try It Free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       SUNSHINE PRICING HERO + CURRENCY SELECTOR
+       ======================================================================== -->
+  <section class="sunshine-banner" style="padding: 64px 0 70px;">
+    <div class="container reveal-up" style="text-align: center; max-width: 760px;">
+      <span class="uppercase-kicker" style="color: #3f3c34;">PRICING</span>
+      <h1 style="font-size: clamp(3rem, 6vw, 4.8rem); margin: 10px 0 16px;">Simple pricing</h1>
+      <p style="font-size: 1.15rem; color: #262521; margin-bottom: 22px;">
+        Pay once for a party, subscribe for a classroom, or customize for your venue. No app to install, and the kids never need an account.
+      </p>
+
+      <div style="display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.88); padding: 7px 16px; border-radius: 999px;">
+        <label for="currency-select" style="font-size: 0.82rem; font-weight: 700;">Currency:</label>
+        <select
+          id="currency-select"
+          style="border: 0; background: transparent; font-family: inherit; font-weight: 800; font-size: 0.88rem; cursor: pointer; outline: none;"
+        >
+          <option value="USD">USD ($)</option>
+          <option value="LKR">LKR (Rs · Sri Lanka)</option>
+          <option value="EUR">EUR (€)</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       4 LIGHT PRICING CARDS (FREE / PLAY PASS / DAY PASS / VENUE CUSTOM)
+       ======================================================================== -->
+  <section style="padding: 76px 0 88px; background: var(--cream-bg);">
+    <div class="container">
+      <div class="pricing-grid reveal-up">
+        <!-- 1. Free -->
+        <div class="pmr-price-card">
+          <h3 class="price-name">Free</h3>
+          <div class="price-amount">Free</div>
+          <p class="price-tagline">Try it right now with the kids.</p>
+          <ul class="price-list">
+            <li>All 6 animated 3D sea creatures</li>
+            <li>Free printable A4 coloring pages</li>
+            <li>Smartphone Camera + Live Web AR</li>
+            <li>No account or app download needed</li>
+          </ul>
+          <a href="./tank-new.html" class="btn-pmr btn-pmr-oat" style="width: 100%; padding: 13px;">
+            Try it free
+          </a>
+        </div>
+
+        <!-- 2. Play Pass (Most Popular) -->
+        <div class="pmr-price-card popular">
+          <span class="popular-badge">Most popular</span>
+          <h3 class="price-name">Play Pass</h3>
+          <div id="price-val-play" class="price-amount">$4 <small>once</small></div>
+          <p class="price-tagline">A rainy afternoon or playdate with the kids.</p>
+          <ul class="price-list">
+            <li>3 hours of private live 3D tank time</li>
+            <li>Up to 25 custom-scanned fish</li>
+            <li>Remote fish feeding &amp; friendly shark</li>
+            <li>Pay once — no subscription</li>
+          </ul>
+          <button
+            type="button"
+            class="btn-pmr btn-pmr-blue"
+            style="width: 100%; padding: 13px;"
+            data-pick-pkg="Play Pass (Playdate / Family)"
+          >
+            Get a Play Pass
+          </button>
+        </div>
+
+        <!-- 3. Day & Party Pass -->
+        <div class="pmr-price-card">
+          <h3 class="price-name">Day &amp; Party Pass</h3>
+          <div id="price-val-day" class="price-amount">$8 <small>once</small></div>
+          <p class="price-tagline">Best for birthday parties, classrooms &amp; school events.</p>
+          <ul class="price-list">
+            <li>24 hours of live 3D tank time</li>
+            <li>Up to 100+ fish — plenty for a big party!</li>
+            <li>Full HD / 4K TV &amp; Projector mode</li>
+            <li>Admin PIN tank reset included</li>
+          </ul>
+          <button
+            type="button"
+            class="btn-pmr btn-pmr-blue"
+            style="width: 100%; padding: 13px;"
+            data-pick-pkg="Day & Party Pass (Birthday / School)"
+          >
+            Get a Day Pass
+          </button>
+        </div>
+
+        <!-- 4. Venue & Brand Custom -->
+        <div class="pmr-price-card" style="background: linear-gradient(180deg, #fffdf6 0%, #fff3c4 100%);">
+          <h3 class="price-name">Venue &amp; Events</h3>
+          <div class="price-amount">Custom</div>
+          <p class="price-tagline">Museums, malls, resorts, play centers &amp; exhibitions.</p>
+          <ul class="price-list">
+            <li>Themed to your venue — your logo &amp; colors</li>
+            <li>Custom Blender <code>.GLB</code> 3D mascots</li>
+            <li>Unlimited scans on giant walls all day</li>
+            <li>Priority setup &amp; technical support</li>
+          </ul>
+          <button
+            type="button"
+            class="btn-pmr btn-pmr-coral"
+            style="width: 100%; padding: 13px;"
+            data-pick-pkg="Venue & Custom Brand Edition"
+          >
+            Contact Us
+          </button>
+        </div>
+      </div>
+
+      <!-- Light Client & Party Booking Card -->
+      <div id="inquiry-box" class="light-inquiry-card reveal-up">
+        <div style="text-align: center;">
+          <span class="uppercase-kicker" style="color: var(--wonder-blue);">BOOK A PASS OR VENUE DEMO</span>
+          <h2 style="font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin-top: 8px;">
+            Planning a party, school day, or brand event?
+          </h2>
+          <p style="color: var(--ink-soft); margin-top: 6px;">
+            Send us a quick note below via WhatsApp or copy your brief — we'll get your custom reef ready!
+          </p>
+        </div>
+
+        <form id="pmr-inquiry-form" class="light-form-grid">
+          <div class="light-form-2">
+            <div class="light-field">
+              <label for="inq-name">Your Name *</label>
+              <input id="inq-name" type="text" placeholder="e.g. Nimali / Kasun" required />
+            </div>
+            <div class="light-field">
+              <label for="inq-contact">WhatsApp / Phone or Email *</label>
+              <input id="inq-contact" type="text" placeholder="e.g. 077 123 4567 or email@example.com" required />
+            </div>
+          </div>
+
+          <div class="light-form-2">
+            <div class="light-field">
+              <label for="inq-org">Party / School / Venue Name</label>
+              <input id="inq-org" type="text" placeholder="e.g. Leo's 6th Birthday / Kids Play Zone" />
+            </div>
+            <div class="light-field">
+              <label for="inq-pkg">Selected Plan</label>
+              <select id="inq-pkg">
+                <option value="Play Pass (Playdate / Family)">Play Pass (Playdate / Family)</option>
+                <option value="Day & Party Pass (Birthday / School)" selected>Day &amp; Party Pass (Birthday / School)</option>
+                <option value="Reef Plus (Teachers & Classrooms)">Reef Plus (Teachers &amp; Classrooms)</option>
+                <option value="Venue & Custom Brand Edition">Venue &amp; Custom Brand Edition</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="light-form-2">
+            <div class="light-field">
+              <label for="inq-date">Event Date (Optional)</label>
+              <input id="inq-date" type="date" />
+            </div>
+            <div class="light-field">
+              <label for="inq-tank-code">Custom Tank Code Idea (Optional)</label>
+              <input
+                id="inq-tank-code"
+                type="text"
+                maxlength="24"
+                placeholder="e.g. LEO-BDAY / KIDS-EXPO"
+                style="text-transform: uppercase;"
+              />
+            </div>
+          </div>
+
+          <div class="light-field">
+            <label for="inq-notes">Screen Setup &amp; Custom Branding Notes</label>
+            <textarea
+              id="inq-notes"
+              rows="3"
+              placeholder="Tell us about your TV/Projector setup, expected number of kids, or custom logo/creature ideas..."
+            ></textarea>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <button id="btn-submit-inquiry" type="submit" class="btn-pmr btn-pmr-blue" style="flex: 1;">
+              🚀 Send Booking Request
+            </button>
+            <button id="btn-send-wa" type="button" class="btn-pmr btn-pmr-coral" style="flex: 1;">
+              💬 Also Chat on WhatsApp
+            </button>
+          </div>
+        </form>
+
+        <div
+          id="pmr-inquiry-toast"
+          class="hidden"
+          style="margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: #dcfce7; color: #166534; font-weight: 700; font-size: 0.9rem;"
+        ></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="pmr-footer">
+    <div class="container pmr-footer-row">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" style="height: 24px; width: auto;" />
+        <span>© 2026 WonderLab AR · 3D Digital Aquarium &amp; Web AR</span>
+      </div>
+      <div class="pmr-footer-links">
+        <a href="./index.html">Home</a>
+        <a href="./how-it-works.html">How it works</a>
+        <a href="./sheets.html">Coloring Pages</a>
+        <a href="./pricing.html">Pricing</a>
+        <a href="./our-story.html">Our Story</a>
+        <a href="./aquarium.html">Launch 3D Tank</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="./js/landing.js"></script>
+</body>
+</html>

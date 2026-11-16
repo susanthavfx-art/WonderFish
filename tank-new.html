@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start Your 3D Tank · WonderLab AR</title>
+  <meta
+    name="description"
+    content="Start a fresh private 3D aquarium with your own Tank Code for a birthday party, classroom, or client event, or join an existing reef."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./css/landing.css" />
+  <script src="./vendor/supabase.js"></script>
+</head>
+<body class="pmr-body">
+
+  <!-- ========================================================================
+       FLOATING WHITE PILL NAVBAR
+       ======================================================================== -->
+  <header id="pmr-header" class="pmr-header">
+    <div class="pmr-header-inner">
+      <a href="./index.html" class="pmr-logo-link">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" class="pmr-logo-img" />
+      </a>
+
+      <nav class="pmr-center-pill" aria-label="Primary Navigation">
+        <a href="./index.html" class="pmr-nav-link" data-i18n="nav_home">Home</a>
+        <a href="./how-it-works.html" class="pmr-nav-link" data-i18n="nav_how">How it works</a>
+        <a href="./pricing.html" class="pmr-nav-link" data-i18n="nav_pricing">Pricing</a>
+        <a href="./our-story.html" class="pmr-nav-link" data-i18n="nav_story">Our Story</a>
+        <a href="./tank-new.html" class="pmr-try-btn" data-i18n="nav_try">Try It Free</a>
+      </nav>
+
+      <div class="pmr-right-actions">
+        <a href="./scan.html" class="pmr-pill-white hide-sm" data-i18n="nav_scan">📷 Scan Sheet</a>
+        <button id="btn-lang-switch" type="button" class="pmr-lang-btn">🌐 EN ▾</button>
+        <button id="btn-mobile-menu" type="button" class="pmr-mobile-toggle">☰ Menu</button>
+      </div>
+    </div>
+
+    <div id="pmr-mobile-drawer" class="pmr-mobile-drawer">
+      <a href="./index.html" class="pmr-nav-link">Home</a>
+      <a href="./how-it-works.html" class="pmr-nav-link">How it works</a>
+      <a href="./pricing.html" class="pmr-nav-link">Pricing</a>
+      <a href="./our-story.html" class="pmr-nav-link">Our Story</a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       PLAY MAGIC REEF STYLE "/tank/new" LAUNCHER
+       ======================================================================== -->
+  <section class="sunshine-banner" style="padding: 54px 0 60px;">
+    <div class="container reveal-up" style="text-align: center; max-width: 780px;">
+      <span class="uppercase-kicker" style="color: #3f3c34;">START IN SECONDS · NO SIGN-UP</span>
+      <h1 style="font-size: clamp(2.6rem, 5.4vw, 4.4rem); margin: 10px 0 14px;">
+        Open your own 3D reef.
+      </h1>
+      <p style="font-size: 1.12rem; color: #262521;">
+        Every party, classroom, or client event gets its own separate <strong>Tank Code</strong> — so your fish never mix with anyone else's tank!
+      </p>
+    </div>
+  </section>
+
+  <section style="padding: 64px 0 92px; background: var(--cream-bg);">
+    <div class="container">
+      <div
+        class="reveal-up"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 26px; max-width: 980px; margin: 0 auto;"
+      >
+        <!-- Card 1: Create Fresh Private Party / Client Tank -->
+        <div
+          style="background: var(--white); border: 2.5px solid var(--wonder-blue); border-radius: 30px; padding: 34px 30px; box-shadow: var(--shadow-card); display: flex; flex-direction: column;"
+        >
+          <span class="wonder-eyebrow-pill" style="align-self: flex-start; margin-bottom: 14px;">
+            ✨ NEW PRIVATE TANK
+          </span>
+          <h2 style="font-size: 2rem; margin-bottom: 8px;">Create a new Tank Code</h2>
+          <p style="font-size: 0.95rem; color: var(--ink-soft); margin-bottom: 22px;">
+            Start a clean 3D reef for your birthday party, classroom, or client showcase. Share the QR code and watch their fish swim in!
+          </p>
+
+          <form id="create-tank-form" class="light-form-grid" style="margin-top: 0;">
+            <div class="light-field">
+              <label for="new-tank-code">🔑 Your Tank Code (Auto-generated or type custom)</label>
+              <div style="display: flex; gap: 8px;">
+                <input
+                  id="new-tank-code"
+                  type="text"
+                  maxlength="24"
+                  required
+                  style="text-transform: uppercase; font-weight: 800; letter-spacing: 0.06em; font-size: 1.05rem;"
+                />
+                <button
+                  id="btn-reroll-code"
+                  type="button"
+                  class="btn-pmr btn-pmr-oat"
+                  style="padding: 0 16px; font-size: 0.85rem; white-space: nowrap;"
+                  title="Generate another code"
+                >
+                  🎲 New
+                </button>
+              </div>
+            </div>
+
+            <div class="light-field">
+              <label for="new-tank-title">🏷️ Event / Reef Name (Optional)</label>
+              <input
+                id="new-tank-title"
+                type="text"
+                maxlength="60"
+                placeholder="e.g. Leo's 6th Birthday Reef 🎂 / Kids Expo"
+              />
+            </div>
+
+            <button
+              id="btn-create-launch-tank"
+              type="submit"
+              class="btn-pmr btn-pmr-blue"
+              style="width: 100%; margin-top: 8px;"
+            >
+              🌊 Launch My Private 3D Tank →
+            </button>
+          </form>
+        </div>
+
+        <!-- Card 2: Join Existing Tank Code OR Shared Demo Reef -->
+        <div style="display: flex; flex-direction: column; gap: 22px;">
+          <div
+            style="background: var(--white); border: 1px solid var(--border-warm); border-radius: 30px; padding: 30px 28px; box-shadow: var(--shadow-card);"
+          >
+            <span class="uppercase-kicker" style="color: var(--wonder-blue);">HAVE A CODE ALREADY?</span>
+            <h3 style="font-size: 1.75rem; margin: 6px 0 8px;">Open an existing Tank</h3>
+            <p style="font-size: 0.92rem; color: var(--ink-soft); margin-bottom: 16px;">
+              Enter a party or classroom Tank Code to open it on your TV or send a colored fish from your phone.
+            </p>
+
+            <div class="light-field" style="margin-bottom: 12px;">
+              <input
+                id="join-tank-code"
+                type="text"
+                maxlength="24"
+                placeholder="Enter code (e.g. LEO-PARTY)"
+                style="text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;"
+              />
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button
+                id="btn-join-screen"
+                type="button"
+                class="btn-pmr btn-pmr-blue"
+                style="flex: 1; padding: 12px 16px; font-size: 0.88rem;"
+              >
+                📺 Open Big Screen
+              </button>
+              <button
+                id="btn-join-scanner"
+                type="button"
+                class="btn-pmr btn-pmr-oat"
+                style="flex: 1; padding: 12px 16px; font-size: 0.88rem;"
+              >
+                📷 Scan a Fish In
+              </button>
+            </div>
+          </div>
+
+          <!-- Instant Public Demo Tank -->
+          <div
+            style="background: linear-gradient(155deg, #fff6cc 0%, #ffe6eb 100%); border: 1px solid rgba(255, 88, 118, 0.22); border-radius: 30px; padding: 26px 28px; box-shadow: var(--shadow-card);"
+          >
+            <h3 style="font-size: 1.5rem; margin-bottom: 6px;">🐠 Just want a quick peek?</h3>
+            <p style="font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 14px;">
+              Jump right into our shared showcase reef (<code>WONDER-REEF</code>) to test fish feeding, shark mode &amp; scanning immediately!
+            </p>
+            <a
+              href="./aquarium.html?tank=WONDER-REEF"
+              class="btn-pmr btn-pmr-coral"
+              style="width: 100%; padding: 12px 18px; font-size: 0.92rem;"
+            >
+              ✨ Open Shared Demo Reef →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pmr-footer">
+    <div class="container pmr-footer-row">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="./assets/wonderlab-ar-logo-light.png" alt="WonderLab AR" style="height: 24px; width: auto;" />
+        <span>© 2026 WonderLab AR · 3D Digital Aquarium &amp; Web AR</span>
+      </div>
+      <div class="pmr-footer-links">
+        <a href="./index.html">Home</a>
+        <a href="./how-it-works.html">How it works</a>
+        <a href="./sheets.html">Coloring Pages</a>
+        <a href="./pricing.html">Pricing</a>
+        <a href="./our-story.html">Our Story</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="./js/landing.js"></script>
+</body>
+</html>
