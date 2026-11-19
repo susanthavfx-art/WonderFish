@@ -1301,6 +1301,13 @@ a {
   margin: 8px 0 4px;
 }
 
+/* Placeholder shown while Play Pass / Day Pass prices are not final */
+.price-amount.price-coming-soon {
+  font-size: 2rem;
+  font-style: italic;
+  color: var(--wonder-blue);
+}
+
 .price-amount small {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.85rem;

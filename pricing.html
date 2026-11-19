@@ -56,7 +56,7 @@
   </header>
 
   <!-- ========================================================================
-       SUNSHINE PRICING HERO + CURRENCY SELECTOR
+       SUNSHINE PRICING HERO (currency selector hidden until prices are final)
        ======================================================================== -->
   <section class="sunshine-banner" style="padding: 64px 0 70px;">
     <div class="container reveal-up" style="text-align: center; max-width: 760px;">
@@ -66,6 +66,9 @@
         Pay once for a party, subscribe for a classroom, or customize for your venue. No app to install, and the kids never need an account.
       </p>
 
+      <!-- Currency selector hidden until prices are final.
+           To re-enable: remove this comment wrapper and set the prices in
+           initPricingCurrencySwitcher() in js/landing.js.
       <div style="display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.88); padding: 7px 16px; border-radius: 999px;">
         <label for="currency-select" style="font-size: 0.82rem; font-weight: 700;">Currency:</label>
         <select
@@ -77,6 +80,7 @@
           <option value="EUR">EUR (€)</option>
         </select>
       </div>
+      -->
     </div>
   </section>
 
@@ -106,7 +110,7 @@
         <div class="pmr-price-card popular">
           <span class="popular-badge">Most popular</span>
           <h3 class="price-name">Play Pass</h3>
-          <div id="price-val-play" class="price-amount"> <small>once</small></div>
+          <div id="price-val-play" class="price-amount price-coming-soon">Coming soon</div>
           <p class="price-tagline">A rainy afternoon or playdate with the kids.</p>
           <ul class="price-list">
             <li>3 hours of private live 3D tank time</li>
@@ -127,7 +131,7 @@
         <!-- 3. Day & Party Pass -->
         <div class="pmr-price-card">
           <h3 class="price-name">Day &amp; Party Pass</h3>
-          <div id="price-val-day" class="price-amount"> <small>once</small></div>
+          <div id="price-val-day" class="price-amount price-coming-soon">Coming soon</div>
           <p class="price-tagline">Best for birthday parties, classrooms &amp; school events.</p>
           <ul class="price-list">
             <li>24 hours of live 3D tank time</li>

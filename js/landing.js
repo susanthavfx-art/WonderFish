@@ -243,14 +243,19 @@ function initPricingCurrencySwitcher() {
   const sel = document.getElementById('currency-select');
   if (!sel) return;
 
+  // Prices are NOT final yet — the pricing page shows "Coming soon" and the
+  // currency selector is hidden (commented out in pricing.html), so this
+  // function is currently a no-op. When prices are final: fill these in,
+  // e.g. LKR: { play: 'Rs 1,500', day: 'Rs 3,000' }, and un-comment the selector.
   const prices = {
-    USD: { play: '$4', day: '$8' },
-    LKR: { play: 'Rs 1,200', day: 'Rs 2,500' },
-    EUR: { play: '€4', day: '€8' }
+    USD: { play: '', day: '' },
+    LKR: { play: '', day: '' },
+    EUR: { play: '', day: '' }
   };
 
   sel.addEventListener('change', () => {
     const p = prices[sel.value] || prices.USD;
+    if (!p.play || !p.day) return; // keep "Coming soon" until prices are set
     const elPlay = document.getElementById('price-val-play');
     const elDay = document.getElementById('price-val-day');
     if (elPlay) elPlay.innerHTML = `${p.play} <small>once</small>`;
