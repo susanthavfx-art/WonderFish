@@ -506,6 +506,12 @@ a {
   letter-spacing: -1px;
 }
 
+@media (max-width: 768px) {
+  .hero-video-frame {
+    background-image: url('../assets/marketing-video-poster-mobile.jpg');
+  }
+}
+
 @media (max-width: 720px) {
   .hero-video-btn {
     bottom: 12px;

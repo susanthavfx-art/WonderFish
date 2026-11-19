@@ -372,6 +372,26 @@ function initHeroMarketingVideo() {
 
   let userPaused = false;
 
+  // Pick the right file for the screen. Browsers that ignore <source media="">
+  // would otherwise always take the first (mobile) source, so correct it here.
+  const SOURCES = {
+    mobile: { src: './assets/marketing-video-mobile.mp4', poster: './assets/marketing-video-poster-mobile.jpg' },
+    desktop: { src: './assets/Markating%20Video.mp4', poster: './assets/marketing-video-poster.jpg' }
+  };
+  const saveData = navigator.connection?.saveData === true;
+  const isSmall = window.matchMedia?.('(max-width: 768px)').matches;
+  const wanted = isSmall || saveData ? SOURCES.mobile : SOURCES.desktop;
+  const wantedFile = wanted.src.split('/').pop();
+  video.poster = wanted.poster;
+  const current = decodeURI(video.currentSrc || '');
+  if (current && !current.endsWith(decodeURI(wantedFile))) {
+    video.src = wanted.src;
+    video.load();
+  } else if (!current) {
+    video.querySelectorAll('source').forEach((s) => s.remove());
+    video.src = wanted.src;
+  }
+
   const render = () => {
     const L = t();
     if (soundBtn) {
@@ -390,9 +410,9 @@ function initHeroMarketingVideo() {
     if (p && typeof p.catch === 'function') p.catch(() => render());
   };
 
-  // Respect users who prefer reduced motion: show the poster, let them press play.
+  // Respect reduced-motion / data-saver users: show the poster, let them press play.
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) {
+  if (reduceMotion || saveData) {
     video.removeAttribute('autoplay');
     video.pause();
     userPaused = true;
