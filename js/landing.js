@@ -358,10 +358,96 @@ function initSupabaseBookingForm() {
   });
 }
 
+function initHeroMarketingVideo() {
+  const video = document.getElementById('hero-marketing-video');
+  if (!video) return;
+
+  const soundBtn = document.getElementById('hero-video-sound');
+  const playBtn = document.getElementById('hero-video-play');
+  const LABELS = {
+    en: { soundOff: 'Tap for sound', soundOn: 'Sound on', pause: 'Pause video', play: 'Play video' },
+    si: { soundOff: 'ශබ්දය අහන්න', soundOn: 'ශබ්දය ඇත', pause: 'වීඩියෝව නවත්වන්න', play: 'වීඩියෝව ධාවනය කරන්න' }
+  };
+  const t = () => LABELS[localStorage.getItem('wonderlab_site_lang')] || LABELS.en;
+
+  let userPaused = false;
+
+  const render = () => {
+    const L = t();
+    if (soundBtn) {
+      soundBtn.setAttribute('aria-pressed', String(!video.muted));
+      soundBtn.querySelector('.hero-video-btn-icon').textContent = video.muted ? '🔇' : '🔊';
+      soundBtn.querySelector('.hero-video-btn-label').textContent = video.muted ? L.soundOff : L.soundOn;
+    }
+    if (playBtn) {
+      playBtn.querySelector('span').textContent = video.paused ? '▶' : '❚❚';
+      playBtn.setAttribute('aria-label', video.paused ? L.play : L.pause);
+    }
+  };
+
+  const tryPlay = () => {
+    const p = video.play();
+    if (p && typeof p.catch === 'function') p.catch(() => render());
+  };
+
+  // Respect users who prefer reduced motion: show the poster, let them press play.
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) {
+    video.removeAttribute('autoplay');
+    video.pause();
+    userPaused = true;
+  }
+
+  soundBtn?.addEventListener('click', () => {
+    video.muted = !video.muted;
+    if (!video.muted) {
+      video.volume = 1;
+      if (video.paused) {
+        userPaused = false;
+        tryPlay();
+      }
+    }
+    render();
+  });
+
+  playBtn?.addEventListener('click', () => {
+    if (video.paused) {
+      userPaused = false;
+      tryPlay();
+    } else {
+      userPaused = true;
+      video.pause();
+    }
+  });
+
+  ['play', 'pause', 'volumechange'].forEach((ev) => video.addEventListener(ev, render));
+  document.getElementById('btn-lang-switch')?.addEventListener('click', () => setTimeout(render, 0));
+
+  // Save battery/data: pause while the hero is scrolled out of view.
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (!userPaused) tryPlay();
+          } else if (!video.paused) {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+    io.observe(video);
+  }
+
+  render();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initStickyHeaderAndMobileMenu();
   initLanguageSwitcher();
   initScrollRevealAnimations();
+  initHeroMarketingVideo();
   initLiveAquariumTvAndQr();
   initTankNewLauncher();
   initSheetLightbox();
