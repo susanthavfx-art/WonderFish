@@ -53,6 +53,16 @@ without the first tap. Close Chrome's kiosk window with **Alt + F4**.
 - Turn off notifications (Focus / Do not disturb)
 - Keep the laptop plugged into power
 
+## Before opening (shop setup)
+
+1. Log in on `admin.html?tank=CODE` with the **master PIN** and set the **Venue** plan (always on, unlimited scans).
+2. Upload the shop logo (**Admin → Shop Branding**) and set the shop's own **Tank PIN**.
+3. Print the sheets from **🖨️ Branded Sheets → Print All**. Their QR codes open this tank's scanner.
+4. Press **▶ Start Event**.
+5. Each week, send the shop its **Scan Report** (Print / PDF).
+
+See [`SHOP-ADMIN.md`](./SHOP-ADMIN.md).
+
 ## Venue checklist
 
 - Laptop + HDMI cable + TV / projector

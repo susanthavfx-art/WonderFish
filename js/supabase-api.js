@@ -294,7 +294,10 @@ export async function submitFishToSupabase({ name, species, textureDataUrl, room
     .single();
 
   if (insertErr) {
-    throw new Error(`Database insert failed: ${insertErr.message}`);
+    const code = extractTankErrorCode(insertErr.message);
+    const err = new Error(code ? friendlyTankError(code) : `Database insert failed: ${insertErr.message}`);
+    err.code = code || 'INSERT_FAILED';
+    throw err;
   }
 
   const fish = mapRowToFish(row);
@@ -321,14 +324,10 @@ export async function resetAllFishesInSupabase(adminPin, hideDemo = true, explic
   if (!supabaseClient) throw new Error('Supabase client not initialized');
   const room = normalizeRoomCode(explicitRoom || getActiveRoomCode());
 
-  const { data, error } = await supabaseClient.rpc('reset_aquarium_room', {
+  const data = await callAdminRpc('admin_reset_tank', {
     target_room: room,
     admin_pin: String(adminPin || '').trim()
   });
-
-  if (error) {
-    throw new Error(error.message || 'Invalid Admin PIN');
-  }
 
   try {
     const ch = initLiveChannel({}, room);
@@ -349,14 +348,11 @@ export async function deleteSingleFishInSupabase(fishId, adminPin) {
   if (!supabaseClient) throw new Error('Supabase client not initialized');
   const room = getActiveRoomCode();
 
-  const { data, error } = await supabaseClient.rpc('delete_aquarium_fish', {
-    target_id: fishId,
-    admin_pin: String(adminPin || '').trim()
+  const data = await callAdminRpc('admin_delete_fish', {
+    target_room: room,
+    admin_pin: String(adminPin || '').trim(),
+    target_id: fishId
   });
-
-  if (error) {
-    throw new Error(error.message || 'Invalid Admin PIN');
-  }
 
   try {
     const ch = initLiveChannel({}, room);
@@ -417,3 +413,119 @@ export async function submitClientInquiryToSupabase({
   }
   return true;
 }
+
+
+// ============================================================================
+// PER-TANK ADMIN (PIN) API — see supabase/migrations/*_tank_admin_pins_*.sql
+// Every admin RPC returns { ok: true, ... } or { ok: false, error: CODE }.
+// ============================================================================
+
+const TANK_ERROR_TEXT = {
+  BAD_PIN: 'PIN අංකය වැරදියි. • Wrong PIN.',
+  PIN_LOCKED: 'වැරදි PIN ගොඩක් ගැහුවා. විනාඩි 10කින් ආයෙ උත්සාහ කරන්න. • Too many wrong PINs — try again in 10 minutes.',
+  TANK_NOT_FOUND: 'මේ Tank Code එක හොයාගන්න බැහැ. • Tank Code not found.',
+  TANK_EXISTS: 'මේ Tank Code එක දැනටමත් පාවිච්චි වෙනවා. වෙන code එකක් තෝරන්න. • This Tank Code is already taken.',
+  WEAK_PIN: 'PIN එක ඉලක්කම් 4–12ක් විය යුතුයි (1234 බැහැ). • PIN must be 4–12 digits (not 1234).',
+  MASTER_ONLY: 'මේක කරන්න පුළුවන් WonderLab Master PIN එකෙන් විතරයි. • Only the WonderLab master PIN can do this.',
+  EVENT_ENDED: 'මේ session එක ඉවරයි. අලුතින් පටන් ගන්න WonderLab අමතන්න. • This session has ended — contact WonderLab to renew.',
+  BAD_LOGO: 'Logo එක PNG / JPG / WEBP විය යුතුයි, 280KB ට අඩු. • Logo must be PNG/JPG/WEBP under 280KB.',
+  INVALID_PLAN: 'Plan එක වැරදියි. • Invalid plan.',
+  INVALID_ROOM_CODE: 'Tank Code එක අකුරු/ඉලක්කම් 2–28ක් විය යුතුයි. • Tank Code must be 2–28 letters/numbers.',
+  TANK_NOT_STARTED: 'Host තවම Event එක Start කරලා නැහැ. ටිකක් ඉන්න! • The host has not started this event yet.',
+  TANK_EVENT_ENDED: 'මේ Tank session එක ඉවරයි. • This tank session has ended.',
+  FISH_LIMIT_REACHED: 'මේ Tank එකේ scan limit එක පිරිලා. • This tank has reached its scan limit.',
+  PIN_UPGRADE_REQUIRED: 'Page එක reload කරන්න. • Please reload the page.',
+  NETWORK: 'Internet connection එක check කරන්න. • Check the internet connection.'
+};
+
+export function friendlyTankError(code) {
+  return TANK_ERROR_TEXT[code] || TANK_ERROR_TEXT.NETWORK;
+}
+
+function extractTankErrorCode(message) {
+  const m = String(message || '').match(/\b(TANK_NOT_STARTED|TANK_EVENT_ENDED|FISH_LIMIT_REACHED|INVALID_ROOM_CODE|PIN_UPGRADE_REQUIRED)\b/);
+  return m ? m[1] : null;
+}
+
+export class TankAdminError extends Error {
+  constructor(code) {
+    super(friendlyTankError(code));
+    this.code = code;
+  }
+}
+
+async function callAdminRpc(fn, params) {
+  if (!supabaseClient) throw new TankAdminError('NETWORK');
+  let res;
+  try {
+    res = await supabaseClient.rpc(fn, params);
+  } catch (_) {
+    throw new TankAdminError('NETWORK');
+  }
+  if (res.error) {
+    throw new TankAdminError(extractTankErrorCode(res.error.message) || 'NETWORK');
+  }
+  const data = res.data;
+  if (!data || data.ok === false) {
+    throw new TankAdminError(data?.error || 'NETWORK');
+  }
+  return data;
+}
+
+// Remember a verified PIN for this browser tab only (cleared when the tab closes)
+const PIN_KEY = (room) => `wonderfish_admin_pin:${normalizeRoomCode(room)}`;
+export function rememberAdminPin(room, pin) {
+  try { sessionStorage.setItem(PIN_KEY(room), String(pin || '')); } catch (_) {}
+}
+export function getRememberedAdminPin(room) {
+  try { return sessionStorage.getItem(PIN_KEY(room)) || ''; } catch (_) { return ''; }
+}
+export function forgetAdminPin(room) {
+  try { sessionStorage.removeItem(PIN_KEY(room)); } catch (_) {}
+}
+
+// Public status: plan, timer, scans used, branding. Returns null if unknown / offline.
+export async function fetchTankStatus(room = getActiveRoomCode()) {
+  if (!supabaseClient) return null;
+  try {
+    const { data, error } = await supabaseClient.rpc('get_tank_status', { target_room: normalizeRoomCode(room) });
+    if (error) return null;
+    return data || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+export const createTankWithPin = (room, title, pin) =>
+  callAdminRpc('create_tank_with_pin', { target_room: room, target_title: title || '', new_pin: String(pin || '').trim() });
+
+export const adminLogin = (room, pin) =>
+  callAdminRpc('admin_login', { target_room: room, admin_pin: String(pin || '').trim() });
+
+export const adminStartEvent = (room, pin) =>
+  callAdminRpc('admin_start_event', { target_room: room, admin_pin: String(pin || '').trim() });
+
+export const adminChangePin = (room, pin, newPin) =>
+  callAdminRpc('admin_change_pin', { target_room: room, admin_pin: String(pin || '').trim(), new_pin: String(newPin || '').trim() });
+
+export const adminSetBranding = (room, pin, { title = '', brandName = '', brandLogo = '', brandColor = '' } = {}) =>
+  callAdminRpc('admin_set_branding', {
+    target_room: room,
+    admin_pin: String(pin || '').trim(),
+    new_title: title,
+    new_brand_name: brandName,
+    new_brand_logo: brandLogo,
+    new_brand_color: brandColor
+  });
+
+export const adminTankReport = (room, pin, days = 30) =>
+  callAdminRpc('admin_tank_report', { target_room: room, admin_pin: String(pin || '').trim(), days });
+
+export const adminSetTankPlan = (room, pin, plan, restart = false) =>
+  callAdminRpc('admin_set_tank_plan', { target_room: room, admin_pin: String(pin || '').trim(), new_plan: plan, restart });
+
+export const adminListTanks = (pin) =>
+  callAdminRpc('admin_list_tanks', { admin_pin: String(pin || '').trim() });
+
+export const adminChangeMasterPin = (pin, newPin) =>
+  callAdminRpc('admin_change_master_pin', { admin_pin: String(pin || '').trim(), new_pin: String(newPin || '').trim() });

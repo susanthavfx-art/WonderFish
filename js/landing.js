@@ -162,25 +162,70 @@ function initTankNewLauncher() {
   createForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('btn-create-launch-tank');
+    const errEl = document.getElementById('create-tank-error');
     const code = cleanRoomCode(newCodeInp?.value || randomTankCode('REEF'));
     const title = document.getElementById('new-tank-title')?.value?.trim() || '';
+    const pin = document.getElementById('new-tank-pin')?.value?.trim() || '';
+    const pin2 = document.getElementById('new-tank-pin2')?.value?.trim() || '';
+
+    const showErr = (msg) => {
+      if (!errEl) return alert(msg);
+      errEl.textContent = msg;
+      errEl.style.display = msg ? 'block' : 'none';
+    };
+    showErr('');
+
+    if (!/^[0-9]{4,12}$/.test(pin) || pin === '1234') {
+      showErr('PIN එක ඉලක්කම් 4–12ක් විය යුතුයි (1234 බැහැ). • PIN must be 4–12 digits (not 1234).');
+      return;
+    }
+    if (pin !== pin2) {
+      showErr('PIN දෙක සමාන නැහැ. • PINs do not match.');
+      return;
+    }
 
     if (btn) {
       btn.disabled = true;
       btn.textContent = '🌊 Creating your reef...';
     }
 
+    const resetBtn = () => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🌊 Launch My Private 3D Tank →';
+      }
+    };
+
+    if (!sb) {
+      showErr('Server එකට connect වෙන්න බැහැ. Internet එක check කරන්න.');
+      resetBtn();
+      return;
+    }
+
+    const { data, error } = await sb.rpc('create_tank_with_pin', {
+      target_room: code,
+      target_title: title,
+      new_pin: pin
+    });
+    if (error || !data?.ok) {
+      const codeErr = data?.error;
+      showErr(
+        codeErr === 'TANK_EXISTS'
+          ? 'මේ Tank Code එක දැනටමත් පාවිච්චි වෙනවා. 🎲 New ඔබලා වෙන code එකක් ගන්න.'
+          : codeErr === 'WEAK_PIN'
+            ? 'PIN එක ඉලක්කම් 4–12ක් විය යුතුයි (1234 බැහැ).'
+            : codeErr === 'INVALID_ROOM_CODE'
+              ? 'Tank Code එක අකුරු / ඉලක්කම් 2–28ක් විය යුතුයි.'
+              : 'Tank එක හදන්න බැරි වුණා. Internet එක check කරලා ආයෙ උත්සාහ කරන්න.'
+      );
+      resetBtn();
+      return;
+    }
+
     try {
       sessionStorage.setItem('wonderfish_active_room', code);
-      if (sb) {
-        await sb.from('aquarium_tanks').upsert(
-          {
-            room_code: code,
-            title: (title || `Tank ${code}`).slice(0, 80)
-          },
-          { onConflict: 'room_code', ignoreDuplicates: false }
-        );
-      }
+      // Same key as supabase-api.js rememberAdminPin(): lets the TV page Start the event in one tap
+      sessionStorage.setItem(`wonderfish_admin_pin:${code}`, pin);
     } catch (_) {}
 
     window.location.href = `./aquarium.html?tank=${encodeURIComponent(code)}`;

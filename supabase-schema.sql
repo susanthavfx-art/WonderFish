@@ -2,6 +2,8 @@
 -- SUPABASE SCHEMA FOR WONDERFISH • 3D DIGITAL AQUARIUM & WEB AR
 -- Connected Project: digital-aquarium (tjvmncxnnurseyqheblp)
 -- Includes: Multi-Room Tank Codes, Named Tanks, Room PIN Reset & Client Inquiries
+-- NOTE: later changes (plans, per-tank PINs, branding, scan stats, cleanup) are in
+--       supabase/migrations/*.sql. Run those after this file. See SHOP-ADMIN.md.
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS public.aquarium_fishes (
