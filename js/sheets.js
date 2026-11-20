@@ -12,6 +12,20 @@ import {
   FRAME_SIZE
 } from './vision.js';
 import { makeQrPngDataUrl } from './qr.js';
+import { getActiveRoomCode, buildPageUrlWithRoom, fetchTankStatus } from './supabase-api.js';
+
+// Sheets opened for a specific tank (?tank=CODE, or from the TV / admin page) get
+// that tank's scanner QR code and the shop's logo. Without a tank they stay generic.
+function detectExplicitTank() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tank') || params.get('room')) return getActiveRoomCode();
+    if (sessionStorage.getItem('wonderfish_active_room')) return getActiveRoomCode();
+  } catch (_) {}
+  return null;
+}
+const explicitTank = detectExplicitTank();
+const activeTank = explicitTank || getActiveRoomCode();
 
 const CRAYON_COLORS = [
   '#ff5400', '#ffbe0b', '#ff006e', '#8338ec',
@@ -35,10 +49,65 @@ class PrintableSheetsApp {
     this.clearPaintLayer();
 
     this.displayCanvas = document.getElementById('sheet-frame-canvas');
+    this.brand = { name: '', color: '', logoImg: null, title: '' };
 
     this.initUI();
     this.renderSheet();
     preloadCustomCreatureAssets().then(() => this.renderSheet());
+    this.loadTankBranding();
+  }
+
+  async loadTankBranding() {
+    if (!explicitTank) return;
+    const info = document.getElementById('sheet-tank-info');
+    const label = document.getElementById('sheet-tank-label');
+    const note = document.getElementById('sheet-tank-brand-note');
+    info?.classList.remove('hidden');
+    if (label) label.textContent = `🔑 Tank: ${explicitTank}`;
+    const footer = document.getElementById('sheet-footer-right');
+    if (footer) footer.textContent = `Tank: ${explicitTank}`;
+
+    const tank = await fetchTankStatus(explicitTank);
+    if (!tank) {
+      if (note) note.textContent = 'QR code එක මේ tank එකට යනවා.';
+      return;
+    }
+    this.brand.name = tank.brand_name || '';
+    this.brand.title = tank.title && tank.title !== `Tank ${tank.room_code}` ? tank.title : '';
+    this.brand.color = /^#[0-9a-f]{6}$/i.test(tank.brand_color || '') ? tank.brand_color : '';
+    if (tank.brand_logo) {
+      this.brand.logoImg = await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = tank.brand_logo;
+      });
+    }
+    if (note) {
+      note.textContent =
+        this.brand.logoImg || this.brand.name
+          ? `✅ ${this.brand.name || 'Shop'} logo එක sheets වල print වෙනවා.`
+          : 'Shop logo එකක් දාන්න: ⚙️ Admin → Shop Branding.';
+    }
+    this.applyBrandToHtmlSheet();
+  }
+
+  applyBrandToHtmlSheet() {
+    const box = document.getElementById('sheet-shop-brand');
+    const logo = document.getElementById('sheet-shop-logo');
+    const name = document.getElementById('sheet-shop-name');
+    const has = !!(this.brand.logoImg || this.brand.name);
+    box?.classList.toggle('hidden', !has);
+    if (logo) {
+      if (this.brand.logoImg) {
+        logo.src = this.brand.logoImg.src;
+        logo.classList.remove('hidden');
+      } else {
+        logo.classList.add('hidden');
+      }
+    }
+    if (name) name.textContent = this.brand.name || '';
+    if (box && this.brand.color) box.style.setProperty('--sheet-brand-color', this.brand.color);
   }
 
   clearPaintLayer() {
@@ -66,7 +135,10 @@ class PrintableSheetsApp {
     }
 
     // Pure client-side PNG QR code pointing to ./scan.html (works on GitHub Pages subpaths!)
-    const scanUrl = new URL('./scan.html', window.location.href).href;
+    // With a tank, the QR opens that tank's scanner directly.
+    const scanUrl = explicitTank
+      ? buildPageUrlWithRoom('./scan.html', explicitTank)
+      : new URL('./scan.html', window.location.href).href;
     const sheetQr = document.getElementById('sheet-qr-img');
     if (sheetQr) {
       sheetQr.src = makeQrPngDataUrl(scanUrl, 260, '#000000', '#ffffff');
@@ -78,6 +150,13 @@ class PrintableSheetsApp {
 
     document.getElementById('btn-download-png')?.addEventListener('click', () => {
       this.downloadPrintableA4Png();
+    });
+
+    document.getElementById('btn-print-all')?.addEventListener('click', () => {
+      this.printAllSheets();
+    });
+    window.addEventListener('afterprint', () => {
+      document.body.classList.remove('printing-all');
     });
 
     document.getElementById('btn-close-dl-modal')?.addEventListener('click', () => {
@@ -215,8 +294,8 @@ class PrintableSheetsApp {
     renderPrintableFrameToCanvas(this.displayCanvas, this.activeSpecies, inner);
   }
 
-  buildA4SheetCanvas() {
-    const meta = getSpeciesMeta(this.activeSpecies);
+  buildA4SheetCanvas(speciesId = this.activeSpecies, frameCanvas = this.displayCanvas) {
+    const meta = getSpeciesMeta(speciesId);
     const a4 = document.createElement('canvas');
     a4.width = 1240;
     a4.height = 1754;
@@ -225,10 +304,39 @@ class PrintableSheetsApp {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, a4.width, a4.height);
 
+    ctx.textAlign = 'center';
+    const brandLogo = this.brand?.logoImg;
+    const brandName = this.brand?.name || '';
+    if (brandLogo || brandName) {
+      // Shop header band: logo + "Presented by" name
+      const bandColor = this.brand.color || '#0ea5e9';
+      ctx.fillStyle = bandColor;
+      ctx.fillRect(0, 0, a4.width, 10);
+      let x = 70;
+      if (brandLogo) {
+        const maxW = 230;
+        const maxH = 96;
+        const sc = Math.min(maxW / brandLogo.naturalWidth, maxH / brandLogo.naturalHeight);
+        const w = brandLogo.naturalWidth * sc;
+        const h = brandLogo.naturalHeight * sc;
+        ctx.drawImage(brandLogo, x, 28 + (maxH - h) / 2, w, h);
+        x += w + 22;
+      }
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#64748b';
+      ctx.font = '600 20px system-ui, sans-serif';
+      ctx.fillText('PRESENTED BY', x, 62);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 34px system-ui, sans-serif';
+      ctx.fillText((brandName || this.brand.title || '').slice(0, 40), x, 102);
+      ctx.textAlign = 'center';
+    }
+
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 42px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('QUIVER DIGITAL AQUARIUM', a4.width / 2, 95);
+    if (!(brandLogo || brandName)) {
+      ctx.fillText('WONDERFISH DIGITAL AQUARIUM', a4.width / 2, 95);
+    }
 
     ctx.font = '600 30px system-ui, sans-serif';
     ctx.fillStyle = '#334155';
@@ -239,7 +347,7 @@ class PrintableSheetsApp {
     ctx.fillText('1. Color inside the lines   •   2. Keep the 4 black corner squares clean   •   3. Scan with Phone Camera!', a4.width / 2, 198);
 
     const frameSize = 1040;
-    ctx.drawImage(this.displayCanvas, (a4.width - frameSize) / 2, 245, frameSize, frameSize);
+    ctx.drawImage(frameCanvas, (a4.width - frameSize) / 2, 245, frameSize, frameSize);
 
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 3;
@@ -257,15 +365,60 @@ class PrintableSheetsApp {
       ctx.drawImage(qrImg, a4.width / 2 - 75, 1505, 150, 150);
       ctx.font = '20px system-ui, sans-serif';
       ctx.fillStyle = '#475569';
-      ctx.fillText('Scan QR to open Camera Scanner', a4.width / 2, 1685);
+      ctx.fillText(
+        explicitTank ? `Scan QR to open Camera Scanner  •  Tank: ${explicitTank}` : 'Scan QR to open Camera Scanner',
+        a4.width / 2,
+        1685
+      );
     }
 
     return a4;
   }
 
+  // Every species on its own A4 page, with this tank's QR + shop logo
+  async printAllSheets() {
+    const btn = document.getElementById('btn-print-all');
+    const host = document.getElementById('print-all-pages');
+    if (!host) return;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '⏳ Sheets හදනවා...';
+    }
+    try {
+      host.innerHTML = '';
+      const loads = [];
+      for (const sp of SPECIES_LIST) {
+        const inner = document.createElement('canvas');
+        inner.width = INNER_SIZE;
+        inner.height = INNER_SIZE;
+        drawCreatureSilhouette(inner.getContext('2d'), sp.id, INNER_SIZE, 'outline');
+        const frame = document.createElement('canvas');
+        renderPrintableFrameToCanvas(frame, sp.id, inner);
+        const a4 = this.buildA4SheetCanvas(sp.id, frame);
+        const img = new Image();
+        img.alt = sp.name;
+        loads.push(new Promise((r) => { img.onload = r; img.onerror = r; }));
+        img.src = a4.toDataURL('image/png');
+        host.appendChild(img);
+      }
+      await Promise.all(loads);
+      document.body.classList.add('printing-all');
+      window.print();
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🖨️ Print All (Tank QR + Logo)';
+      }
+      // afterprint removes .printing-all; fallback for browsers without it
+      setTimeout(() => document.body.classList.remove('printing-all'), 60000);
+    }
+  }
+
   downloadPrintableA4Png() {
     const a4 = this.buildA4SheetCanvas();
-    const filename = `Digital-Aquarium-Sheet-${this.activeSpecies}.png`;
+    const filename = explicitTank
+      ? `WonderFish-${explicitTank}-${this.activeSpecies}.png`
+      : `Digital-Aquarium-Sheet-${this.activeSpecies}.png`;
 
     a4.toBlob((blob) => {
       if (!blob) return;

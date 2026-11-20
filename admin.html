@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Tank Admin · WonderFish</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/admin.css" />
+  <script src="./vendor/supabase.js"></script>
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <header class="admin-topbar no-print">
+      <div class="admin-brand">
+        <img src="./assets/wonderlab-ar-logo.png" alt="WonderLab AR" class="brand-logo sub-logo" />
+        <h1>🔐 Tank Admin</h1>
+      </div>
+      <nav class="admin-nav">
+        <a href="./index.html" class="hud-btn">🏠 Website</a>
+        <a id="nav-tv" href="./aquarium.html" class="hud-btn">🌊 TV Tank</a>
+        <button id="btn-logout" type="button" class="hud-btn hidden">🔓 Logout</button>
+      </nav>
+    </header>
+
+    <!-- ================= LOGIN ================= -->
+    <section id="login-view" class="panel-card admin-login no-print">
+      <span class="step-badge">SHOP / PARTY HOST LOGIN</span>
+      <h2 class="panel-title">ඔයාගේ Tank එක manage කරන්න</h2>
+      <p class="panel-desc">
+        Tank Code එකයි Admin PIN එකයි ගහන්න. Event එක Start කරන්න, shop logo එක දාන්න, scan report එක බලන්න පුළුවන්.
+      </p>
+      <form id="login-form" autocomplete="off">
+        <label class="admin-label" for="login-room">🔑 Tank Code</label>
+        <input id="login-room" class="text-input admin-code-input" maxlength="28" required placeholder="REEF-4829" />
+        <label class="admin-label" for="login-pin">🔐 Admin PIN</label>
+        <input id="login-pin" class="text-input" type="password" inputmode="numeric" maxlength="32" required placeholder="••••••" />
+        <div id="login-error" class="admin-error hidden"></div>
+        <button id="btn-login" type="submit" class="btn-block btn-gradient-teal">Login →</button>
+      </form>
+      <p class="admin-hint">
+        Tank එකක් නැද්ද? <a href="./tank-new.html">අලුත් Tank එකක් හදන්න</a>. පරණ tanks වල PIN එක <code>1234</code>.
+        Login වුණාට පස්සේ අලුත් PIN එකක් දාන්න.
+      </p>
+    </section>
+
+    <!-- ================= DASHBOARD ================= -->
+    <main id="dash-view" class="hidden">
+      <!-- Status -->
+      <section class="panel-card admin-status no-print">
+        <div class="admin-status-head">
+          <img id="status-logo" class="admin-status-logo hidden" alt="Shop logo" />
+          <div style="flex: 1; min-width: 0;">
+            <div class="admin-room" id="status-room">REEF-0000</div>
+            <h2 class="panel-title" id="status-title">Tank</h2>
+            <div class="admin-pills">
+              <span id="status-plan" class="admin-pill">Free</span>
+              <span id="status-state" class="admin-pill">—</span>
+              <span id="status-role" class="admin-pill admin-pill-muted">Shop admin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-tiles">
+          <div class="admin-tile"><span class="admin-tile-label">⏳ ඉතුරු කාලය</span><strong id="status-time">—</strong></div>
+          <div class="admin-tile"><span class="admin-tile-label">🐠 Scans (මේ session එක)</span><strong id="status-scans">—</strong></div>
+        </div>
+
+        <div class="admin-actions">
+          <button id="btn-start-event" type="button" class="btn-block btn-gradient-coral hidden">▶ Start Event</button>
+          <a id="link-tv" class="hud-btn" target="_blank" rel="noopener">🌊 TV Tank</a>
+          <a id="link-kiosk" class="hud-btn" target="_blank" rel="noopener">🖥️ Kiosk TV</a>
+          <a id="link-sheets" class="hud-btn" target="_blank" rel="noopener">🖨️ Branded Sheets</a>
+          <button id="btn-copy-scan" type="button" class="hud-btn">📱 Copy scanner link</button>
+          <button id="btn-refresh" type="button" class="hud-btn">↻ Refresh</button>
+        </div>
+      </section>
+
+      <!-- Default PIN warning -->
+      <section id="pin-warning" class="panel-card admin-warning no-print hidden">
+        ⚠️ <strong>මේ tank එක තාම default PIN එක (1234) පාවිච්චි කරනවා.</strong>
+        Shop එකට දෙන්න කලින් පහළින් අලුත් PIN එකක් දාන්න.
+      </section>
+
+      <!-- Report -->
+      <section id="report-card" class="panel-card admin-report">
+        <div class="admin-report-head">
+          <div>
+            <span class="step-badge no-print">📊 SCAN REPORT</span>
+            <div class="print-only report-print-brand">
+              <img id="report-print-logo" class="hidden" alt="" />
+              <div>
+                <div class="report-print-shop" id="report-print-shop"></div>
+                <div class="report-print-sub">WonderFish Digital Aquarium · Scan Report</div>
+              </div>
+            </div>
+            <h2 class="panel-title" id="report-title">Scan Report</h2>
+            <div class="admin-sub" id="report-range-label"></div>
+          </div>
+          <div class="admin-report-controls no-print">
+            <select id="report-days" class="text-input">
+              <option value="7">අන්තිම දින 7</option>
+              <option value="30" selected>අන්තිම දින 30</option>
+              <option value="90">අන්තිම දින 90</option>
+              <option value="365">අවුරුද්ද</option>
+            </select>
+            <button id="btn-report-csv" type="button" class="hud-btn">⬇️ CSV</button>
+            <button id="btn-report-print" type="button" class="hud-btn">🖨️ Print / PDF</button>
+          </div>
+        </div>
+
+        <div class="admin-tiles admin-tiles-4">
+          <div class="admin-tile"><span class="admin-tile-label">අද</span><strong id="rep-today">0</strong></div>
+          <div class="admin-tile"><span class="admin-tile-label" id="rep-range-name">දින 30</span><strong id="rep-range">0</strong></div>
+          <div class="admin-tile"><span class="admin-tile-label">මුළු scans</span><strong id="rep-all">0</strong></div>
+          <div class="admin-tile"><span class="admin-tile-label">වැඩිම සෙනඟ වෙලාව</span><strong id="rep-peak">—</strong></div>
+        </div>
+
+        <h3 class="admin-h3">📅 දිනපතා scans</h3>
+        <div id="chart-days" class="admin-chart admin-chart-days"></div>
+
+        <h3 class="admin-h3">🕒 දවසේ වෙලාව අනුව (ලංකා වේලාව)</h3>
+        <div id="chart-hours" class="admin-chart admin-chart-hours"></div>
+
+        <h3 class="admin-h3">🐠 ළමයි වැඩියෙන් තෝරපු සතුන්</h3>
+        <div id="chart-species" class="admin-species"></div>
+
+        <p class="admin-hint">
+          Fish images දවස් 2කින් auto delete වෙනවා. ඒත් මේ scan ගණන් <strong>සදහටම</strong> තියෙනවා.
+          ළමයාගේ නමක් හෝ photo එකක් මේ report එකේ නැහැ.
+        </p>
+      </section>
+
+      <!-- Branding -->
+      <section class="panel-card no-print">
+        <span class="step-badge">🏷️ SHOP BRANDING</span>
+        <h2 class="panel-title">Shop logo එක coloring sheets වලටයි TV එකටයි</h2>
+        <p class="panel-desc">
+          මෙතන දාන logo එක <strong>coloring sheets</strong> වල (print / PNG) සහ <strong>TV tank</strong> එකේ QR card එකේ පෙන්වනවා.
+        </p>
+        <form id="brand-form" class="admin-grid-2">
+          <div>
+            <label class="admin-label" for="brand-title">Event / Tank නම</label>
+            <input id="brand-title" class="text-input" maxlength="80" placeholder="Odel Christmas Reef 🎄" />
+            <label class="admin-label" for="brand-name">Shop / Brand නම</label>
+            <input id="brand-name" class="text-input" maxlength="60" placeholder="ODEL Kandy" />
+            <label class="admin-label" for="brand-color">Brand පාට</label>
+            <div class="admin-color-row">
+              <input id="brand-color" type="color" value="#0ea5e9" />
+              <label class="admin-check"><input id="brand-color-on" type="checkbox" /> පාට පාවිච්චි කරන්න</label>
+            </div>
+          </div>
+          <div>
+            <label class="admin-label" for="brand-logo-file">Logo (PNG / JPG, transparent PNG හොඳයි)</label>
+            <div class="admin-logo-drop">
+              <img id="brand-logo-preview" class="hidden" alt="Logo preview" />
+              <span id="brand-logo-empty">Logo එකක් නැහැ</span>
+            </div>
+            <div class="admin-actions" style="margin-top: 8px;">
+              <label class="hud-btn" style="cursor: pointer;">
+                📁 Logo තෝරන්න
+                <input id="brand-logo-file" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" />
+              </label>
+              <button id="btn-logo-remove" type="button" class="hud-btn">✕ Remove</button>
+            </div>
+          </div>
+          <div class="admin-span-2">
+            <div id="brand-msg" class="admin-msg hidden"></div>
+            <button id="btn-brand-save" type="submit" class="btn-block btn-gradient-teal">💾 Branding Save කරන්න</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Change PIN -->
+      <section class="panel-card no-print">
+        <span class="step-badge">🔐 ADMIN PIN</span>
+        <h2 class="panel-title">Tank PIN එක වෙනස් කරන්න</h2>
+        <p class="panel-desc">ඉලක්කම් 4–12ක් (6ක් හොඳයි). මේ PIN එක shop manager ට විතරක් දෙන්න.</p>
+        <form id="pin-form" class="admin-grid-2" autocomplete="off">
+          <div>
+            <label class="admin-label" for="pin-new">අලුත් PIN</label>
+            <input id="pin-new" class="text-input" type="password" inputmode="numeric" maxlength="12" required />
+          </div>
+          <div>
+            <label class="admin-label" for="pin-confirm">ආයෙත් ගහන්න</label>
+            <input id="pin-confirm" class="text-input" type="password" inputmode="numeric" maxlength="12" required />
+          </div>
+          <div class="admin-span-2">
+            <div id="pin-msg" class="admin-msg hidden"></div>
+            <button type="submit" class="btn-block btn-outline">🔐 PIN එක Save කරන්න</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- WonderLab owner (master PIN) -->
+      <section id="owner-card" class="panel-card admin-owner no-print hidden">
+        <span class="step-badge">👑 WONDERLAB OWNER</span>
+        <h2 class="panel-title">Plan &amp; සියලුම Tanks</h2>
+        <p class="panel-desc">
+          Shop එක ගෙවුවාම මෙතනින් plan එක දාන්න. <strong>Venue</strong> කියන්නේ කාල සීමාවක් නැති, scans unlimited plan එක. Shops / malls වලට ඒක දෙන්න.
+        </p>
+        <form id="plan-form" class="admin-plan-row">
+          <select id="plan-select" class="text-input">
+            <option value="free">Free · විනාඩි 30 · scans 6</option>
+            <option value="play">Play Pass · පැය 3 · scans 25</option>
+            <option value="day">Day &amp; Party · පැය 24 · scans 100</option>
+            <option value="venue">Venue (Shops) · always on · unlimited</option>
+            <option value="legacy">Legacy / Demo · start නොකර වැඩ · unlimited</option>
+          </select>
+          <label class="admin-check"><input id="plan-restart" type="checkbox" /> Timer එක reset කරන්න (ආයෙ Start කරන්න වෙනවා)</label>
+          <button type="submit" class="hud-btn primary-cta">✔ Plan එක දාන්න</button>
+        </form>
+        <div id="plan-msg" class="admin-msg hidden"></div>
+
+        <h3 class="admin-h3">🗂️ සියලුම Tanks</h3>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Tank</th><th>Shop / නම</th><th>Plan</th><th>PIN</th><th>Scans 7d</th><th>සියල්ල</th><th></th></tr>
+            </thead>
+            <tbody id="tanks-tbody"></tbody>
+          </table>
+        </div>
+
+        <h3 class="admin-h3">🔑 Master PIN එක වෙනස් කරන්න</h3>
+        <form id="master-pin-form" class="admin-plan-row" autocomplete="off">
+          <input id="master-pin-new" class="text-input" type="password" inputmode="numeric" maxlength="12" placeholder="අලුත් master PIN (ඉලක්කම් 6–12)" required />
+          <input id="master-pin-confirm" class="text-input" type="password" inputmode="numeric" maxlength="12" placeholder="ආයෙත් ගහන්න" required />
+          <button type="submit" class="hud-btn">🔑 Save</button>
+        </form>
+        <div id="master-pin-msg" class="admin-msg hidden"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="admin-toast" class="admin-toast hidden"></div>
+
+  <script type="module" src="./js/admin.js"></script>
+</body>
+</html>

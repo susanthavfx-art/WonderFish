@@ -64,12 +64,23 @@
         <input id="glb-test-input" type="file" accept=".glb,.gltf" class="hidden" />
       </label>
       <button id="btn-reset-tank" class="hud-btn" title="Clear all fish &amp; start fresh">🧹</button>
+      <a id="btn-admin" href="./admin.html" class="hud-btn" style="text-decoration: none;" title="Tank Admin: Start Event, shop logo, scan report, PIN">⚙️ Admin</a>
       <button id="btn-sound" class="hud-btn" title="Toggle sound">🔊</button>
       <button id="btn-fullscreen" class="hud-btn" title="Toggle fullscreen">⛶</button>
       <button id="btn-kiosk" class="hud-btn" title="Kiosk mode for shops &amp; parties (exit: Ctrl+Shift+K or tap top-left corner 5 times)">🖥️ Kiosk</button>
       <button id="btn-collapse-hud" class="hud-btn hud-collapse-btn" title="Minimize / Expand menu bar">▾</button>
     </div>
   </header>
+
+  <!-- Plan status banner: shown only while kids cannot send fish -->
+  <div id="tank-status-banner" class="tank-status-banner hidden">
+    <div id="tank-status-text" class="tank-status-text"></div>
+    <form id="tank-start-form" class="tank-start-form hidden" autocomplete="off">
+      <input id="tank-start-pin" type="password" inputmode="numeric" maxlength="32" placeholder="Admin PIN" aria-label="Admin PIN" />
+      <button type="submit">▶ Start Event</button>
+    </form>
+    <div id="tank-start-msg" class="tank-start-msg"></div>
+  </div>
 
   <!-- Celebratory New Fish Arrival Banner -->
   <div id="arrival-toast" class="arrival-toast"></div>
@@ -111,13 +122,13 @@
 
       <div style="margin-bottom: 12px;">
         <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #bae6fd; margin-bottom: 5px;">
-          🔐 Admin PIN අංකය (Default: <code>1234</code>):
+          🔐 මේ Tank එකේ Admin PIN එක:
         </label>
         <input
           id="reset-pin-input"
           type="password"
           inputmode="numeric"
-          placeholder="1234"
+          placeholder="••••••"
           class="text-input"
         />
       </div>
@@ -202,6 +213,13 @@
       <button id="btn-toggle-qr" class="qr-toggle-btn" title="Minimize / Expand">▾</button>
     </div>
     <div class="qr-body">
+      <div id="qr-brand" class="qr-brand hidden">
+        <img id="qr-brand-logo" class="hidden" alt="Shop logo" />
+        <div class="qr-brand-text">
+          <span class="qr-brand-kicker">Presented by</span>
+          <span id="qr-brand-name" class="qr-brand-name"></span>
+        </div>
+      </div>
       <div
         id="qr-room-badge"
         style="font-size: 0.76rem; font-weight: 800; color: #5eead4; background: rgba(13, 148, 136, 0.22); border: 1px solid rgba(94, 234, 212, 0.35); border-radius: 999px; padding: 3px 10px; margin-bottom: 7px; display: inline-block;"
@@ -214,6 +232,7 @@
       <div class="qr-caption">
         Color a printed sheet &amp; scan with your phone camera to watch it swim here live!
       </div>
+      <div id="qr-plan-chip" class="qr-plan-chip hidden"></div>
       <div id="scan-url-text" class="qr-url"></div>
     </div>
   </aside>

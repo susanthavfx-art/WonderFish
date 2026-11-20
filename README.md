@@ -28,6 +28,17 @@ Built by **WonderLab AR** — a playful, kid-friendly **3D Digital Aquarium & We
 
 ---
 
+## 🔐 Tank Admin, Shop Branding & Scan Reports
+
+- **`admin.html?tank=CODE`**: per-tank **Admin PIN** (hashed, brute-force lockout) plus a WonderLab **master PIN**.
+- The admin page handles:
+  - ▶ Start Event
+  - plans (Free / Play / Day / **Venue**)
+  - shop logo & name
+  - **scan reports** (daily, busiest hours, top creatures; Print/PDF and CSV)
+- **`sheets.html?tank=CODE`**: coloring sheets carry the shop logo plus a QR code for that tank's scanner. **Print All** prints every creature.
+- Full guide: [`SHOP-ADMIN.md`](./SHOP-ADMIN.md).
+
 ## 🧹 Automatic Cleanup (2 days)
 
 The Supabase Edge Function **`cleanup-old-fish`** (`supabase/functions/cleanup-old-fish/index.js`) runs every hour via `pg_cron` and deletes scanned fish rows **and** their `fish-textures` images older than 48 hours. Setup SQL: `supabase/migrations/20261119000000_cleanup_old_fish.sql`.

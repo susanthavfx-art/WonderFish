@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Printable Coloring Sheets • 3D Digital Aquarium</title>
   <link rel="stylesheet" href="./css/styles.css" />
+  <script src="./vendor/supabase.js"></script>
   <script type="importmap">
     {
       "imports": {
@@ -43,7 +44,15 @@
           <button id="btn-print-sheet" class="hud-btn">
             🖨️ Print A4 Sheet
           </button>
+          <button id="btn-print-all" class="hud-btn primary-cta" title="Print every sea creature sheet with this tank's QR code and shop logo">
+            🖨️ Print All (Tank QR + Logo)
+          </button>
         </div>
+      </div>
+
+      <div id="sheet-tank-info" class="sheet-tank-info hidden">
+        <span id="sheet-tank-label">🔑 Tank: —</span>
+        <span id="sheet-tank-brand-note"></span>
       </div>
 
       <p style="font-size: 0.86rem; color: #cbd5e1; margin-top: 8px;">
@@ -71,7 +80,11 @@
     <article class="a4-paper-sheet">
       <div class="sheet-top-row">
         <div>
-          <div class="sheet-brand">🐠 DIGITAL AQUARIUM • COLOR &amp; SCAN</div>
+          <div id="sheet-shop-brand" class="sheet-shop-brand hidden">
+            <img id="sheet-shop-logo" class="hidden" alt="" />
+            <span id="sheet-shop-name"></span>
+          </div>
+          <div class="sheet-brand">🐠 WONDERFISH • COLOR &amp; SCAN</div>
           <div id="sheet-species-title" style="font-size: 1rem; font-weight: 700; color: #0284c7; margin-top: 2px;"></div>
           <div class="sheet-steps">
             1. Color inside the sea creature with crayons or color pencils.<br />
@@ -89,10 +102,13 @@
 
       <div class="sheet-footer-row">
         <span>Artist Name / ඔයාගේ නම: ___________________________________</span>
-        <span>3D AR + Live Tank</span>
+        <span id="sheet-footer-right">3D AR + Live Tank</span>
       </div>
     </article>
   </div>
+
+  <!-- "Print All" pages (filled by js/sheets.js just before printing) -->
+  <div id="print-all-pages" class="print-all-pages" aria-hidden="true"></div>
 
   <!-- Iframe-Safe Fallback Preview Modal -->
   <div

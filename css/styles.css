@@ -845,6 +845,67 @@ body.sheets-body {
     padding: 6mm !important;
     max-width: 100% !important;
   }
+  body.printing-all .sheets-container {
+    display: none !important;
+  }
+  body.printing-all .print-all-pages {
+    display: block !important;
+  }
+  .print-all-pages img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 277mm;
+    object-fit: contain;
+    page-break-after: always;
+    break-after: page;
+  }
+  .print-all-pages img:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+}
+
+.print-all-pages {
+  display: none;
+}
+
+.sheet-tank-info {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #99f6e4;
+}
+.sheet-tank-info span:first-child {
+  background: rgba(13, 148, 136, 0.28);
+  border: 1px solid rgba(94, 234, 212, 0.55);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+#sheet-tank-brand-note {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.sheet-shop-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.sheet-shop-brand img {
+  max-height: 54px;
+  max-width: 150px;
+  object-fit: contain;
+}
+.sheet-shop-brand span {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--sheet-brand-color, #0f172a);
 }
 
 /* ==========================================================================
@@ -959,3 +1020,82 @@ body.kiosk-mode.kiosk-hide-cursor * {
 .kiosk-offline-badge.visible {
   opacity: 1;
 }
+
+/* ==========================================================================
+   TANK PLAN STATUS + SHOP BRANDING (aquarium.html, js/tank-status.js)
+   ========================================================================== */
+.tank-status-banner {
+  position: fixed;
+  top: max(140px, 18vh);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 34;
+  width: min(560px, calc(100vw - 28px));
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.94), rgba(15, 23, 42, 0.94));
+  border: 1.5px solid rgba(251, 191, 36, 0.75);
+  border-radius: 18px;
+  padding: 12px 16px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+.tank-status-banner[data-state='ended'],
+.tank-status-banner[data-state='full'] {
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.94), rgba(15, 23, 42, 0.94));
+  border-color: rgba(248, 113, 113, 0.75);
+}
+.tank-status-text { font-weight: 800; font-size: 0.95rem; color: #fef3c7; line-height: 1.4; }
+.tank-start-form { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+.tank-start-form input {
+  width: 140px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  background: rgba(2, 12, 27, 0.75);
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+.tank-start-form button {
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #f97316, #ec4899);
+}
+.tank-start-form button:disabled { opacity: 0.6; }
+.tank-start-msg { font-size: 0.8rem; color: #fecaca; margin-top: 6px; }
+.tank-start-msg:empty { display: none; }
+body.kiosk-mode .tank-status-banner { top: 18px; }
+
+.qr-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  text-align: left;
+}
+.qr-brand img { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+.qr-brand-text { display: flex; flex-direction: column; min-width: 0; }
+.qr-brand-kicker { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; }
+.qr-brand-name { font-size: 0.86rem; font-weight: 800; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qr-brand-name:empty { display: none; }
+.qr-card.has-brand-color { border-color: var(--brand-color); box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45), 0 0 0 2px var(--brand-color); }
+.qr-plan-chip {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #fde68a;
+  background: rgba(120, 53, 15, 0.45);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-bottom: 6px;
+}
+body.kiosk-mode .qr-brand img { width: 64px; height: 64px; }
+body.kiosk-mode .qr-brand-name { font-size: 1.05rem; }

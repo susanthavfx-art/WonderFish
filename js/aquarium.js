@@ -19,8 +19,12 @@ import {
   normalizeRoomCode,
   generateRandomRoomCode,
   buildPageUrlWithRoom,
-  registerOrFetchTank
+  registerOrFetchTank,
+  rememberAdminPin,
+  getRememberedAdminPin,
+  forgetAdminPin
 } from './supabase-api.js';
+import { initTankStatusUI } from './tank-status.js';
 import { makeQrPngDataUrl } from './qr.js';
 import { ENVIRONMENT_CONFIG } from './environment-config.js';
 import { initKioskMode, isKioskRequested } from './kiosk.js';
@@ -1585,6 +1589,7 @@ class DigitalAquariumApp {
     initLiveChannel({
       onFishAdded: (fish) => {
         if (fish) this.spawnCreatureFromRecord(fish, true);
+        this.tankStatus?.noteFishArrived();
       },
       onFishDeleted: (fishId) => {
         // Auto-cleanup (2-day old fish) or an admin delete: swim away gracefully
@@ -1710,6 +1715,11 @@ class DigitalAquariumApp {
     if (qrRoomBadge) qrRoomBadge.textContent = `🔑 Code: ${activeRoom}`;
     const resetRoomLbl = document.getElementById('reset-room-label');
     if (resetRoomLbl) resetRoomLbl.textContent = activeRoom;
+    const adminLink = document.getElementById('btn-admin');
+    if (adminLink) adminLink.href = buildPageUrlWithRoom('./admin.html', activeRoom);
+
+    // Plan timer / "Start Event" banner / shop logo on the QR card
+    this.tankStatus = initTankStatusUI(activeRoom);
 
     registerOrFetchTank(activeRoom).then((meta) => {
       const titleEl = document.getElementById('tank-title-label');
@@ -1800,7 +1810,9 @@ class DigitalAquariumApp {
     const resetModal = document.getElementById('reset-tank-modal');
     document.getElementById('btn-reset-tank')?.addEventListener('click', () => {
       resetModal?.classList.remove('hidden');
-      document.getElementById('reset-pin-input')?.focus();
+      const pinInp = document.getElementById('reset-pin-input');
+      if (pinInp && !pinInp.value) pinInp.value = getRememberedAdminPin(getActiveRoomCode());
+      pinInp?.focus();
     });
     document.getElementById('btn-cancel-reset')?.addEventListener('click', () => {
       resetModal?.classList.add('hidden');
@@ -1813,11 +1825,14 @@ class DigitalAquariumApp {
       btn.textContent = '⏳ ඉවත් කරමින්...';
       try {
         await resetAllFishesInSupabase(pin, hideDemo);
+        rememberAdminPin(getActiveRoomCode(), pin);
         this.clearAllUserFishesLocally(hideDemo);
         resetModal?.classList.add('hidden');
         document.getElementById('reset-pin-input').value = '';
+        this.tankStatus?.refresh();
       } catch (err) {
-        alert('PIN අංකය වැරදියි හෝ Reset කළ නොහැක (Default PIN: 1234)');
+        if (err?.code === 'BAD_PIN') forgetAdminPin(getActiveRoomCode());
+        alert(err?.message || 'Reset කළ නොහැක.');
       } finally {
         btn.disabled = false;
         btn.textContent = '🧹 ඔක්කොම මාළු ඉවත් කරන්න';
@@ -1827,15 +1842,19 @@ class DigitalAquariumApp {
     // Delete a single scanned fish from spotlight card
     document.getElementById('btn-delete-single-fish')?.addEventListener('click', async () => {
       if (!this.inspectedActorId) return;
-      const pin = prompt('මේ මාළුවා අයින් කරන්න Admin PIN එක ගහන්න (Default: 1234):', '');
+      const room = getActiveRoomCode();
+      const pin =
+        getRememberedAdminPin(room) || prompt('මේ මාළුවා අයින් කරන්න මේ Tank එකේ Admin PIN එක ගහන්න:', '');
       if (!pin) return;
       try {
         await deleteSingleFishInSupabase(this.inspectedActorId, pin);
+        rememberAdminPin(room, pin);
         this.removeCreature(this.inspectedActorId);
         this.updateFishCounter();
         document.getElementById('fish-inspect-card')?.classList.add('hidden');
-      } catch (_) {
-        alert('PIN අංකය වැරදියි! (Default PIN: 1234)');
+      } catch (err) {
+        if (err?.code === 'BAD_PIN') forgetAdminPin(room);
+        alert(err?.message || 'මාළුවා අයින් කරන්න බැරි වුණා.');
       }
     });
 
