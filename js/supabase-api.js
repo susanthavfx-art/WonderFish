@@ -198,31 +198,58 @@ export function initLiveChannel(callbacks = {}, explicitRoom = null) {
     });
   }
 
-  liveChannel.subscribe((status) => {
+  const thisChannel = liveChannel;
+  thisChannel.subscribe((status) => {
+    // Ignore late status events from a channel we already replaced (reconnect)
+    if (thisChannel !== liveChannel) return;
     channelReady = status === 'SUBSCRIBED';
-    if (onStatusChange) onStatusChange(channelReady);
+    if (onStatusChange) onStatusChange(channelReady, status);
   });
 
   return liveChannel;
 }
 
-// Fetch up to 50 recent fishes ONLY for the active Tank Code!
-export async function fetchInitialFishes(explicitRoom = null) {
-  if (!supabaseClient) return [];
+// Tear down and re-open the realtime channel for the current room.
+// Used by the tank to recover after Wi-Fi drops / laptop sleep / long idle.
+export function reconnectLiveChannel() {
+  if (!supabaseClient || !cachedCallbacks) return null;
+  const room = subscribedRoom || getActiveRoomCode();
+  if (liveChannel) {
+    const old = liveChannel;
+    liveChannel = null;
+    channelReady = false;
+    subscribedRoom = null;
+    try {
+      supabaseClient.removeChannel(old);
+    } catch (_) {}
+  }
+  return initLiveChannel(cachedCallbacks, room);
+}
+
+// Fetch the NEWEST fishes (default 40) ONLY for the active Tank Code,
+// returned oldest -> newest so they can be spawned in arrival order.
+// Returns null on a network / API error (so callers can tell "error" from "empty").
+export async function fetchRecentFishes(explicitRoom = null, limit = 40) {
+  if (!supabaseClient) return null;
   const room = normalizeRoomCode(explicitRoom || getActiveRoomCode());
 
   const { data, error } = await supabaseClient
     .from('aquarium_fishes')
     .select('*')
     .eq('room_code', room)
-    .order('created_at', { ascending: true })
-    .limit(50);
+    .order('created_at', { ascending: false })
+    .limit(limit);
 
   if (error) {
     console.warn('Supabase fetch error:', error.message);
-    return [];
+    return null;
   }
-  return (data || []).map(mapRowToFish);
+  return (data || []).map(mapRowToFish).reverse();
+}
+
+// Backwards-compatible helper: always returns an array
+export async function fetchInitialFishes(explicitRoom = null, limit = 40) {
+  return (await fetchRecentFishes(explicitRoom, limit)) || [];
 }
 
 // Upload scanned UV texture PNG to Supabase Storage & insert fish into active Tank Code

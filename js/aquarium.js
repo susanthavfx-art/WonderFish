@@ -10,8 +10,9 @@ import {
   preloadCustomCreatureAssets
 } from './creatures.js';
 import {
-  fetchInitialFishes,
+  fetchRecentFishes,
   initLiveChannel,
+  reconnectLiveChannel,
   resetAllFishesInSupabase,
   deleteSingleFishInSupabase,
   getActiveRoomCode,
@@ -22,6 +23,7 @@ import {
 } from './supabase-api.js';
 import { makeQrPngDataUrl } from './qr.js';
 import { ENVIRONMENT_CONFIG } from './environment-config.js';
+import { initKioskMode, isKioskRequested } from './kiosk.js';
 
 // ============================================================================
 // WEB AUDIO SYNTHESIZER (SPLASH, BUBBLES, CHIME, SHARK THEME - ZERO EXTERNAL MP3S)
@@ -128,6 +130,13 @@ class OceanAudio {
 
 const TANK_BOUNDS = { x: 13.5, yMin: -4.6, yMax: 5.2, zMin: -7.5, zMax: 4.5 };
 
+// Busy venues (malls, parties): keep at most this many creatures swimming at once.
+// When a new fish arrives and the tank is full, the oldest one swims away.
+const MAX_FISH_ON_SCREEN = 40;
+// Leaving fish swim off the side of the tank; removed once past this X or after a timeout
+const LEAVE_EXIT_X = TANK_BOUNDS.x + 9;
+const LEAVE_MAX_SECONDS = 9;
+
 const STARTER_FISH_SPECS = [
   { id: 'demo-1', name: 'Kasun', species: 'clownfish', palette: ['#ff6b1a', '#ff8c42', '#ff4d00', '#ffffff'], isDemo: true },
   { id: 'demo-2', name: 'Kavindu', species: 'angelfish', palette: ['#00bbf9', '#fee440', '#ff9f1c', '#ffffff'], isDemo: true },
@@ -158,6 +167,11 @@ class DigitalAquariumApp {
     this.clock = new THREE.Clock();
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
+    this.pendingSpawns = new Set(); // fish ids whose texture is still loading (dedupe)
+    this.realtimeOnline = false;
+    this.hadRealtimeDrop = false;
+    this.reconnectTimer = null;
+    this.resyncInFlight = null;
 
     this.initScene();
     this.buildEnvironment();
@@ -166,6 +180,8 @@ class DigitalAquariumApp {
     this.loadInitialFishes();
     this.connectRealtime();
     this.animate();
+
+    if (isKioskRequested()) initKioskMode(this);
   }
 
   initScene() {
@@ -209,6 +225,8 @@ class DigitalAquariumApp {
     this.controls.minAzimuthAngle = -0.55;
     this.controls.maxAzimuthAngle = 0.55;
     this.controls.target.set(0, -0.3, 0);
+    this.controls.update();
+    this.controls.saveState(); // kiosk mode resets the camera to this home view
 
     // Rich Underwater Lighting
     const hemi = new THREE.HemisphereLight(0x6be6ff, 0x0b2545, 1.35);
@@ -1084,10 +1102,12 @@ class DigitalAquariumApp {
     this.syncDemoFishes();
 
     try {
-      const fishes = await fetchInitialFishes();
+      const fishes = (await fetchRecentFishes(null, MAX_FISH_ON_SCREEN)) || [];
       for (const f of fishes) {
-        await this.spawnCreatureFromRecord(f, false);
+        await this.spawnCreatureFromRecord(f, false, { enforceCap: false });
       }
+      // Tank opens already "full": trim instantly (no swim-away parade on load)
+      this.enforceFishCap({ animate: false });
       this.updateFishCounter();
     } catch (err) {
       console.warn('Could not load initial fishes from Supabase:', err);
@@ -1116,17 +1136,27 @@ class DigitalAquariumApp {
         this.removeCreature(spec.id);
       }
     }
+    this.enforceFishCap({ animate: false });
     this.updateFishCounter();
   }
 
-  spawnCreatureFromRecord(fish, celebrate = true) {
+  spawnCreatureFromRecord(fish, celebrate = true, { enforceCap = true } = {}) {
     return new Promise((resolve) => {
-      if (this.creatures.has(fish.id)) return resolve();
+      if (!fish?.id) return resolve();
+      // The same new fish arrives twice (postgres INSERT + scanner broadcast) and the
+      // texture loads async, so also guard ids that are still loading.
+      if (this.creatures.has(fish.id) || this.pendingSpawns.has(fish.id)) return resolve();
+      this.pendingSpawns.add(fish.id);
       const loader = new THREE.TextureLoader();
       loader.setCrossOrigin('anonymous');
       loader.load(
         fish.textureUrl,
         (tex) => {
+          this.pendingSpawns.delete(fish.id);
+          if (this.creatures.has(fish.id)) {
+            tex.dispose();
+            return resolve();
+          }
           this.registerCreatureActor({
             id: fish.id,
             name: fish.name,
@@ -1137,13 +1167,62 @@ class DigitalAquariumApp {
             isDemo: false,
             celebrate
           });
+          if (enforceCap) this.enforceFishCap({ animate: true, protectId: fish.id });
           this.updateFishCounter();
           resolve();
         },
         undefined,
-        () => resolve()
+        () => {
+          this.pendingSpawns.delete(fish.id);
+          resolve();
+        }
       );
     });
+  }
+
+  // Creatures still swimming in the tank (not counting ones already leaving)
+  activeCreatures() {
+    return [...this.creatures.values()].filter((a) => !a.leaving);
+  }
+
+  // Keep at most MAX_FISH_ON_SCREEN creatures. Starter demo fish leave first,
+  // then the oldest scanned fish. animate=true -> they swim off the side.
+  enforceFishCap({ animate = true, protectId = null } = {}) {
+    const active = this.activeCreatures();
+    let excess = active.length - MAX_FISH_ON_SCREEN;
+    if (excess <= 0) return;
+
+    const candidates = active
+      .filter((a) => a.id !== protectId)
+      .sort((a, b) => {
+        if (a.isDemo !== b.isDemo) return a.isDemo ? -1 : 1;
+        return (a.arrivalOrder || 0) - (b.arrivalOrder || 0);
+      });
+
+    for (const actor of candidates) {
+      if (excess <= 0) break;
+      if (animate) this.retireCreature(actor.id);
+      else this.removeCreature(actor.id);
+      excess--;
+    }
+  }
+
+  // Gracefully swim a creature out of the tank, then remove it
+  retireCreature(id) {
+    const actor = this.creatures.get(id);
+    if (!actor || actor.leaving) return;
+    actor.leaving = true;
+    actor.leaveTime = 0;
+    actor.leaveStartedAt = performance.now(); // real-time timeout (slow laptops / low FPS)
+    actor.heroTimer = 0;
+    const side = actor.pos.x >= 0 ? 1 : -1;
+    actor.leaveDir = side;
+    actor.target.set(side * (LEAVE_EXIT_X + 4), actor.pos.y, Math.min(actor.pos.z, -1.5));
+    if (this.inspectedActorId === id) {
+      document.getElementById('fish-inspect-card')?.classList.add('hidden');
+      this.inspectedActorId = null;
+    }
+    this.updateFishCounter();
   }
 
   registerCreatureActor({ id, name, species, texture, previewUrl, createdAt, isDemo, celebrate }) {
@@ -1168,7 +1247,10 @@ class DigitalAquariumApp {
       species,
       previewUrl,
       createdAt: createdAt || new Date().toISOString(),
+      arrivalOrder: (this.arrivalCounter = (this.arrivalCounter || 0) + 1),
       isDemo: !!isDemo,
+      texture,
+      leaving: false,
       root,
       meshGroup,
       labelSprite,
@@ -1190,6 +1272,7 @@ class DigitalAquariumApp {
       actor.pos.set(0, 6.8, 3.2);
       actor.vel.set(0, -3.5, 0.8);
       actor.target.set(0, 0.8, 6.2); // Spotlight front-and-center near glass!
+      this.lastArrivalAt = Date.now(); // kiosk waits for a quiet moment before refreshing
       this.triggerArrivalSplash(name, meta);
     } else {
       actor.pos.copy(this.pickRandomZoneTarget(species));
@@ -1299,6 +1382,41 @@ class DigitalAquariumApp {
     if (!actor) return;
     this.scene.remove(actor.root);
     this.creatures.delete(id);
+    this.disposeActor(actor);
+  }
+
+  // Free GPU memory for a removed creature (kiosk tanks run all day, hundreds of fish).
+  // Only per-fish resources are disposed: the scanned texture, materials that use it,
+  // the name badge, and procedural geometry. Custom .glb geometry is shared, so kept.
+  disposeActor(actor) {
+    try {
+      const tex = actor.texture;
+      const isCustomGlb = !!actor.meshGroup?.userData?.isCustomGlb;
+      const usesFishTexture = (m) =>
+        !!m?.map && !!tex && (m.map === tex || (m.map.source && m.map.source === tex.source));
+
+      actor.meshGroup?.traverse((obj) => {
+        if (!obj.isMesh) return;
+        if (!isCustomGlb) obj.geometry?.dispose();
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        for (const m of mats) {
+          if (!m) continue;
+          if (usesFishTexture(m)) {
+            if (m.map !== tex) m.map.dispose();
+            m.dispose();
+          } else if (!isCustomGlb) {
+            m.dispose();
+          }
+        }
+      });
+      tex?.dispose();
+
+      const label = actor.labelSprite;
+      label?.material?.map?.dispose();
+      label?.material?.dispose();
+    } catch (err) {
+      console.warn('disposeActor failed', err);
+    }
   }
 
   // ==========================================================================
@@ -1411,7 +1529,7 @@ class DigitalAquariumApp {
       while (obj && !obj.userData.creatureId) obj = obj.parent;
       if (obj && obj.userData.creatureId) {
         const actor = this.creatures.get(obj.userData.creatureId);
-        if (actor) {
+        if (actor && !actor.leaving) {
           this.showCreatureSpotlightModal(actor);
           return;
         }
@@ -1469,8 +1587,8 @@ class DigitalAquariumApp {
         if (fish) this.spawnCreatureFromRecord(fish, true);
       },
       onFishDeleted: (fishId) => {
-        this.removeCreature(fishId);
-        this.updateFishCounter();
+        // Auto-cleanup (2-day old fish) or an admin delete: swim away gracefully
+        this.retireCreature(fishId);
       },
       onTankCleared: (payload) => {
         this.clearAllUserFishesLocally(!!payload?.hideDemo);
@@ -1479,10 +1597,82 @@ class DigitalAquariumApp {
         if (payload?.action === 'shark') this.triggerSharkVisit();
         else if (payload?.action === 'feed') this.dropFoodAtWorld(0, 4.2, 0.5);
       },
-      onStatusChange: (online) => {
-        if (statusDot) statusDot.classList.toggle('online', !!online);
+      onStatusChange: (online) => this.handleRealtimeStatus(online, statusDot)
+    });
+
+    // Wi-Fi came back / laptop woke up: reconnect and pick up fish we missed
+    window.addEventListener('online', () => this.forceRealtimeReconnect());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && !this.realtimeOnline) {
+        this.forceRealtimeReconnect();
       }
     });
+  }
+
+  handleRealtimeStatus(online, statusDot) {
+    this.realtimeOnline = !!online;
+    if (statusDot) statusDot.classList.toggle('online', !!online);
+
+    if (online) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+      this.reconnectDelay = 0;
+      if (this.hadRealtimeDrop) {
+        this.hadRealtimeDrop = false;
+        this.resyncFishes();
+      }
+      return;
+    }
+
+    // Lost the live connection: Supabase retries on its own, but if it's still down
+    // after a while, rebuild the channel ourselves (backoff 15s -> 30s -> 60s max).
+    this.hadRealtimeDrop = true;
+    if (!this.reconnectTimer) {
+      this.reconnectDelay = Math.min(60000, (this.reconnectDelay || 7500) * 2);
+      this.reconnectTimer = setTimeout(() => {
+        this.reconnectTimer = null;
+        if (!this.realtimeOnline) this.forceRealtimeReconnect();
+      }, this.reconnectDelay);
+    }
+  }
+
+  forceRealtimeReconnect() {
+    if (navigator.onLine === false) return;
+    this.hadRealtimeDrop = true;
+    reconnectLiveChannel();
+  }
+
+  // Bring the tank in line with the database: spawn fish that arrived while we were
+  // offline, and swim away fish that were deleted (2-day cleanup / admin reset).
+  resyncFishes() {
+    if (this.resyncInFlight) return this.resyncInFlight;
+    this.resyncInFlight = (async () => {
+      try {
+        const latest = await fetchRecentFishes(null, MAX_FISH_ON_SCREEN);
+        if (!latest) return; // network error: keep what we have
+        const ids = new Set(latest.map((f) => f.id));
+
+        for (const actor of [...this.creatures.values()]) {
+          if (!actor.isDemo && !actor.leaving && !ids.has(actor.id)) {
+            this.retireCreature(actor.id);
+          }
+        }
+
+        const recentMs = Date.now() - 3 * 60 * 1000;
+        for (const f of latest) {
+          if (this.creatures.has(f.id)) continue;
+          // Kids who scanned during a short outage still get their splash entrance
+          const celebrate = new Date(f.createdAt).getTime() > recentMs;
+          await this.spawnCreatureFromRecord(f, celebrate);
+        }
+        this.updateFishCounter();
+      } catch (err) {
+        console.warn('resyncFishes failed', err);
+      } finally {
+        this.resyncInFlight = null;
+      }
+    })();
+    return this.resyncInFlight;
   }
 
   // ==========================================================================
@@ -1655,6 +1845,12 @@ class DigitalAquariumApp {
       e.currentTarget.textContent = this.audio.muted ? '🔇 Muted' : '🔊 Sound';
     });
 
+    // Kiosk mode for shops / parties: clean full-screen display that heals itself
+    document.getElementById('btn-kiosk')?.addEventListener('click', () => {
+      document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
+      initKioskMode(this);
+    });
+
     document.getElementById('btn-fullscreen')?.addEventListener('click', () => {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen?.().catch(() => {});
@@ -1735,7 +1931,7 @@ class DigitalAquariumApp {
 
   updateFishCounter() {
     const el = document.getElementById('fish-count-badge');
-    if (el) el.textContent = `${this.creatures.size} Sea Creatures`;
+    if (el) el.textContent = `${this.activeCreatures().length} Sea Creatures`;
   }
 
   escapeHtml(str) {
@@ -1860,6 +2056,41 @@ class DigitalAquariumApp {
     }
   }
 
+  stepLeavingCreature(actor, dt, elapsed) {
+    actor.leaveTime += dt;
+    const walker = actor.species === 'crab' || actor.species === 'starfish';
+    const desired = actor.target.clone().sub(actor.pos);
+    if (desired.lengthSq() > 0.001) desired.normalize();
+    desired.multiplyScalar(actor.speed * (walker ? 1.4 : 1.7));
+    if (walker) desired.y = 0;
+    actor.vel.lerp(desired, dt * 1.6);
+    actor.pos.addScaledVector(actor.vel, dt);
+    actor.root.position.copy(actor.pos);
+
+    const yaw = this.stableYaw(actor, dt);
+    actor.meshGroup.rotation.order = 'YXZ';
+    if (actor.species !== 'crab' && actor.species !== 'starfish' && actor.species !== 'jellyfish') {
+      actor.meshGroup.rotation.y = yaw;
+    }
+
+    // Gently shrink + hide the name badge while leaving
+    const t = Math.min(1, actor.leaveTime / LEAVE_MAX_SECONDS);
+    actor.root.scale.setScalar(1 - t * 0.35);
+    if (actor.labelSprite?.material) actor.labelSprite.material.opacity = Math.max(0, 1 - t * 2.5);
+
+    animateCreatureMesh(actor.meshGroup, elapsed + actor.phase, 1.4);
+
+    const realSeconds = (performance.now() - (actor.leaveStartedAt || 0)) / 1000;
+    if (
+      Math.abs(actor.pos.x) > LEAVE_EXIT_X ||
+      actor.leaveTime > LEAVE_MAX_SECONDS ||
+      realSeconds > LEAVE_MAX_SECONDS + 3
+    ) {
+      this.removeCreature(actor.id);
+      this.updateFishCounter();
+    }
+  }
+
   // Velocity direction becomes pure noise when a creature almost stops: atan2 flips by
   // 180 degrees between frames and the model visibly spins. Freeze the heading while the
   // creature is hovering and ease towards the new heading otherwise (no more snap turns).
@@ -1883,6 +2114,12 @@ class DigitalAquariumApp {
 
   stepCreatureAI(actor, dt, elapsed) {
     const sp = actor.species;
+
+    // 0. Swimming out of a full tank (oldest fish makes room for a new one)
+    if (actor.leaving) {
+      this.stepLeavingCreature(actor, dt, elapsed);
+      return;
+    }
 
     // 1. Hero Arrival Spotlight Moment (spins happily near front glass for 4.5s!)
     if (actor.heroTimer > 0) {
@@ -2026,4 +2263,5 @@ class DigitalAquariumApp {
   }
 }
 
-new DigitalAquariumApp();
+// Exposed for staff debugging in the browser console (e.g. wonderfishApp.resyncFishes())
+window.wonderfishApp = new DigitalAquariumApp();
