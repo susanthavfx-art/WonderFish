@@ -846,3 +846,116 @@ body.sheets-body {
     max-width: 100% !important;
   }
 }
+
+/* ==========================================================================
+   KIOSK MODE (aquarium.html?kiosk=1) — shops, malls, parties & events
+   ========================================================================== */
+body.kiosk-mode #top-hud,
+body.kiosk-mode .tank-hint-pill,
+body.kiosk-mode #studio-drawer,
+body.kiosk-mode #btn-delete-single-fish,
+body.kiosk-mode .qr-toggle-btn {
+  display: none !important;
+}
+
+body.kiosk-mode .qr-card {
+  width: 262px;
+  right: 22px;
+  bottom: 22px;
+}
+
+body.kiosk-mode .qr-card.minimized .qr-body {
+  display: block;
+}
+
+body.kiosk-mode .qr-header {
+  justify-content: center;
+  font-size: 0.98rem;
+}
+
+body.kiosk-mode .qr-img-box {
+  width: 196px;
+  height: 196px;
+}
+
+body.kiosk-mode .qr-caption {
+  font-size: 0.84rem;
+}
+
+body.kiosk-mode.kiosk-hide-cursor,
+body.kiosk-mode.kiosk-hide-cursor * {
+  cursor: none !important;
+}
+
+.kiosk-start-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 20px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: rgba(2, 12, 27, 0.78);
+  border: 1px solid rgba(94, 234, 212, 0.45);
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.kiosk-start-hint span {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #99f6e4;
+}
+
+.kiosk-start-hint.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  animation: kioskHintPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes kioskHintPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(94, 234, 212, 0.35); }
+  50% { box-shadow: 0 0 0 12px rgba(94, 234, 212, 0); }
+}
+
+/* Invisible top-left corner: 5 quick taps = exit kiosk (staff only) */
+.kiosk-exit-hotspot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 72px;
+  z-index: 70;
+  background: transparent;
+}
+
+.kiosk-offline-badge {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 45;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgba(127, 29, 29, 0.85);
+  border: 1px solid rgba(248, 113, 113, 0.6);
+  color: #fee2e2;
+  font-size: 0.82rem;
+  font-weight: 700;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.kiosk-offline-badge.visible {
+  opacity: 1;
+}

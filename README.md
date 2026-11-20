@@ -14,7 +14,7 @@ Built by **WonderLab AR** — a playful, kid-friendly **3D Digital Aquarium & We
 - **`pricing.html`** — **Pricing & Event Booking** (Free / Play Pass / Day Pass / Venue Custom + `USD`/`LKR` switcher + **Direct Supabase `client_inquiries` Booking Form**)
 - **`our-story.html`** — **Our Story** (WonderLab AR story + kid-safety principles)
 - **`tank-new.html`** — **Start Your Tank Launcher** (Create a private **Tank Code** for any party/event or join an existing code!)
-- **`aquarium.html`** — **Fullscreen 3D Digital Aquarium** (`?tank=YOUR-CODE` isolated rooms, QR code overlay, PIN-protected room reset)
+- **`aquarium.html`** — **Fullscreen 3D Digital Aquarium** (`?tank=YOUR-CODE` isolated rooms, QR code overlay, PIN-protected room reset, max 40 fish on screen, **`&kiosk=1` Kiosk Mode** for shops & parties — see [`KIOSK-SETUP.md`](./KIOSK-SETUP.md))
 - **`scan.html`** — **Smartphone Paper Scanner + 4-Corner Vision + Live Camera Web AR** (`?tank=YOUR-CODE`)
 - **`sheets.html`** — **Printable A4 Coloring Sheets & Virtual Crayon Studio**
 
@@ -25,3 +25,9 @@ Built by **WonderLab AR** — a playful, kid-friendly **3D Digital Aquarium & We
 1. **`public.aquarium_fishes`** — Stores scanned fishes isolated by `room_code` (old repo uses `'default'`; WonderFish uses `'WONDER-REEF'` or each event's custom `Tank Code`).
 2. **`public.aquarium_tanks`** — Stores custom event/party Tank Codes & Reef Titles.
 3. **`public.client_inquiries`** — Stores all Pricing / Event Booking form submissions directly from `pricing.html` (viewable privately in **Supabase Dashboard → Table Editor → `client_inquiries`**).
+
+---
+
+## 🧹 Automatic Cleanup (2 days)
+
+The Supabase Edge Function **`cleanup-old-fish`** (`supabase/functions/cleanup-old-fish/index.js`) runs every hour via `pg_cron` and deletes scanned fish rows **and** their `fish-textures` images older than 48 hours. Setup SQL: `supabase/migrations/20261119000000_cleanup_old_fish.sql`.
